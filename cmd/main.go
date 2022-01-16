@@ -21,24 +21,24 @@ import (
 
 func main() {
 
-	l, err := zap.NewDevelopment()
-	if err != nil {
+	var (
+		l   *zap.Logger
+		err error
+	)
+
+	if l, err = zap.NewDevelopment(); err != nil {
 		panic(err)
 	}
 
-	var _ app.Logger = l
-
-	c, err := config.New()
-	if err != nil {
+	var c *config.Configuration
+	if c, err = config.New(); err != nil {
 		l.Fatal("get environment keys", zap.Error(err))
 	}
 
-	var _ app.Config = c
-
 	core := app.New(c, l)
 
-	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
-	if err != nil {
+	var swaggerSpec *loads.Document
+	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
 		l.Fatal("loads swagger spec", zap.Error(err))
 	}
 
@@ -59,4 +59,7 @@ func main() {
 	if err := server.Serve(); err != nil {
 		l.Fatal("start server", zap.Error(err))
 	}
+
+	
+
 }

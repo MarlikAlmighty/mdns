@@ -23,26 +23,26 @@ import (
 
 func main() {
 
-	l, err := zap.NewDevelopment()
-	if err != nil {
+	var (
+		l   *zap.Logger
+		err error
+	)
+
+	if l, err = zap.NewDevelopment(); err != nil {
 		panic(err)
 	}
 
-	var _ app.Logger = l
-
-	c, err := config.New()
-	if err != nil {
+	var c *config.Configuration
+	if c, err = config.New(); err != nil {
 		l.Fatal("get environment keys", zap.Error(err))
 	}
 
-	var _ app.Config = c
-
 	core := app.New(c, l)
 
-	swaggerSpec, err := loads.Analyzed({{ .APIPackage }}.SwaggerJSON, "")
-    if err != nil {
-    	l.Fatal("loads swagger spec", zap.Error(err))
-    }
+	var swaggerSpec *loads.Document
+	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
+		l.Fatal("loads swagger spec", zap.Error(err))
+	}
 
     api := operations.New{{ pascalize .Name }}API(swaggerSpec)
 
