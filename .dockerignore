@@ -1,0 +1,10 @@
+.idea/
+.github/
+pkg/
+swagger-api/
+swagger-templates/
+.gitignore
+.dockerignore
+Dockerfile
+*.yml
+*.md
