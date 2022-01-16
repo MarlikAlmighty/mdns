@@ -1,2 +1,5 @@
 .idea/
-.goreleaser.yml
+swagger-api/
+swagger-templates/
+*.yml
+*.md
