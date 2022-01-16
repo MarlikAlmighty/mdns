@@ -10,12 +10,12 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"mdns/internal/gen/restapi/operations"
-	"mdns/internal/gen/restapi/operations/add"
-	"mdns/internal/gen/restapi/operations/delete"
-	"mdns/internal/gen/restapi/operations/list"
-	"mdns/internal/gen/restapi/operations/show"
-	"mdns/internal/gen/restapi/operations/update"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/update"
 )
 
 //go:generate swagger generate server --target ../../gen --name Mdns --spec ../../../swagger-api/swagger.yml --template-dir ./swagger-templates --principal interface{}

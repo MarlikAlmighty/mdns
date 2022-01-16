@@ -19,11 +19,11 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
-	"mdns/internal/gen/restapi/operations/add"
-	"mdns/internal/gen/restapi/operations/delete"
-	"mdns/internal/gen/restapi/operations/list"
-	"mdns/internal/gen/restapi/operations/show"
-	"mdns/internal/gen/restapi/operations/update"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/update"
 )
 
 // NewMdnsAPI creates a new Mdns instance

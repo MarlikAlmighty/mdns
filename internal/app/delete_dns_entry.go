@@ -1,8 +1,7 @@
 package app
 
 import (
-	apiDelete "mdns/internal/gen/restapi/operations/delete"
-
+	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
 	"github.com/go-openapi/runtime/middleware"
 )
 

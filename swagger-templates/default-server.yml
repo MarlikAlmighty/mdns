@@ -27,7 +27,13 @@ layout:
     - name: loggerPackage
       source: serverLogger
       target: "./internal/app"
-      file_name: "logger_methods.go"
+      file_name: "logger.go"
+      skip_exists: false
+
+    - name: configurationPackage
+      source: serverConfiguration
+      target: "./internal/app"
+      file_name: "configuration.go"
       skip_exists: false
 
     - name: configure

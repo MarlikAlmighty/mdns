@@ -10,9 +10,16 @@
 
 ***
 
+### Run
+```sh
+$ export HTTP_PORT=3000
+$ export CERTIFICATE="foo"
+$ export PRIVATE_KEY="bar"
+```
+
 ### Docker
 ```sh
-$ docker build -t library .
+$ docker build -t mdns .
 ```
 
 ### Documentation: 

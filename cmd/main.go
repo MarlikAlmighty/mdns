@@ -5,19 +5,18 @@ import (
 	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
-	"go.uber.org/zap"
+	apiAdd "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
 
-	apiAdd "mdns/internal/gen/restapi/operations/add"
+	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
 
-	apiDelete "mdns/internal/gen/restapi/operations/delete"
+	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
 
-	apiShow "mdns/internal/gen/restapi/operations/show"
+	apiList "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
 
-	apiList "mdns/internal/gen/restapi/operations/list"
-
-	apiUpdate "mdns/internal/gen/restapi/operations/update"
+	apiUpdate "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/update"
 
 	"github.com/go-openapi/loads"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -55,7 +54,7 @@ func main() {
 
 	server.ConfigureAPI()
 
-	server.Port = c.HTTPPort
+	server.Port = int(c.HTTPPort)
 
 	if err := server.Serve(); err != nil {
 		l.Fatal("start server", zap.Error(err))

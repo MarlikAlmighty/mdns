@@ -1,8 +1,7 @@
 package app
 
 import (
-	apiShow "mdns/internal/gen/restapi/operations/show"
-
+	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
 	"github.com/go-openapi/runtime/middleware"
 )
 

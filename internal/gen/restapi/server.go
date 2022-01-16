@@ -25,7 +25,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"golang.org/x/net/netutil"
 
-	"mdns/internal/gen/restapi/operations"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 )
 
 const (

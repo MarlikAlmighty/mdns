@@ -1,5 +1,3 @@
 .idea/
-swagger-api/
-swagger-templates/
 *.yml
 *.md

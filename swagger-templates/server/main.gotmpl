@@ -1,22 +1,23 @@
 package main
 
+{{ $name := .Name }}
+{{ $operations := .Operations }}
+
 import (
-	"github.com/MarlikAlmighty/mdns/internal/app"
-	"github.com/MarlikAlmighty/mdns/internal/config"
-	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
-	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
-	"go.uber.org/zap"
 
-	apiAdd "mdns/internal/gen/restapi/operations/add"
+{{range $index, $op := .Operations}}
+        {{ $found := false }}
+        {{ range $i, $sop := $operations }}
+            {{ if and (gt $i $index ) (eq $op.Package $sop.Package)}}
+                {{ $found = true }}
+            {{end}}
+        {{end}}
+        {{ if not $found }}
+        api{{ pascalize $op.Package }} "{{$op.GenCommon.TargetImportPath}}/{{ $op.RootPackage }}/operations/{{ $op.Package }}"
+        {{end}}
+    {{end}}
 
-	apiDelete "mdns/internal/gen/restapi/operations/delete"
-
-	apiShow "mdns/internal/gen/restapi/operations/show"
-
-	apiList "mdns/internal/gen/restapi/operations/list"
-
-	apiUpdate "mdns/internal/gen/restapi/operations/update"
-
+    "go.uber.org/zap"
 	"github.com/go-openapi/loads"
 )
 
@@ -38,24 +39,22 @@ func main() {
 
 	core := app.New(c, l)
 
-	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
-	if err != nil {
-		l.Fatal("loads swagger spec", zap.Error(err))
-	}
+	swaggerSpec, err := loads.Analyzed({{ .APIPackage }}.SwaggerJSON, "")
+    if err != nil {
+    	l.Fatal("loads swagger spec", zap.Error(err))
+    }
 
-	api := operations.NewMdnsAPI(swaggerSpec)
+    api := operations.New{{ pascalize .Name }}API(swaggerSpec)
 
-	api.AddAddDNSEntryHandler = apiAdd.AddDNSEntryHandlerFunc(core.AddDNSEntryHandler)
-	api.DeleteDeleteDNSEntryHandler = apiDelete.DeleteDNSEntryHandlerFunc(core.DeleteDNSEntryHandler)
-	api.ShowListOneDNSEntryHandler = apiShow.ListOneDNSEntryHandlerFunc(core.ListOneDNSEntryHandler)
-	api.ListShowDNSRecordsHandler = apiList.ShowDNSRecordsHandlerFunc(core.ShowDNSRecordsHandler)
-	api.UpdateUpdateDNSEntryHandler = apiUpdate.UpdateDNSEntryHandlerFunc(core.UpdateDNSEntryHandler)
+	{{range .Operations}}
+        api.{{ pascalize .Package }}{{ pascalize .Name }}Handler = api{{ pascalize .Package }}.{{ pascalize .Name }}HandlerFunc(core.{{ pascalize .Name }}Handler)
+        {{- end}}
 
-	server := restapi.NewServer(api)
+    server := {{ .APIPackage }}.NewServer(api)
 
 	server.ConfigureAPI()
 
-	server.Port = c.HTTPPort
+	server.Port = int(c.HTTPPort)
 
 	if err := server.Serve(); err != nil {
 		l.Fatal("start server", zap.Error(err))

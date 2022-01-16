@@ -15,7 +15,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/validate"
 
-	"mdns/internal/gen/models"
+	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 )
 
 // NewUpdateDNSEntryParams creates a new UpdateDNSEntryParams object

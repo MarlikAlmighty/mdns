@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-openapi/runtime"
 
-	"mdns/internal/gen/models"
+	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 )
 
 // ShowDNSRecordsOKCode is the HTTP code returned for type ShowDNSRecordsOK
