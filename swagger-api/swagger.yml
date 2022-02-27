@@ -16,12 +16,12 @@ paths:
         - list
       summary: Show all dns records
       operationId: show_dns_records
-      security: []
       responses:
         '200':
           description: OK
           schema:
-            $ref: "#/definitions/dns_records"
+            additionalProperties:
+              $ref: "#/definitions/dns_records"
         '400':
           description: Bad request
           schema:
@@ -31,7 +31,6 @@ paths:
         - add
       summary: Add dns entry
       operationId: add_dns_entry
-      security: []
       consumes:
         - "application/json; charset=utf-8"
       produces:
@@ -56,7 +55,6 @@ paths:
         - update
       summary: Update dns entry
       operationId: update_dns_entry
-      security: []
       consumes:
         - "application/json; charset=utf-8"
       produces:
@@ -81,7 +79,6 @@ paths:
         - delete
       summary: Delete dns entry
       operationId: delete_dns_entry
-      security: []
       parameters:
         - in: body
           name: domain
@@ -101,7 +98,6 @@ paths:
         - show
       summary: List one dns entry
       operationId: list_one__dns_entry
-      security: []
       parameters:
         - in: path
           name: id
@@ -116,30 +112,9 @@ paths:
           description: Bad request
           schema:
             $ref: "#/definitions/fail"
-securityDefinitions:
-  key:
-    type: apiKey
-    in: header
-    name: x-token
 definitions:
-  configuration:
-    type: object
-    required:
-      - "http_port"
-      - "certificate"
-      - "private_key"
-    properties:
-      http_port:
-        type: integer
-        format: unt32
-      certificate:
-        type: string
-      private_key:
-        type: string
   dns_records:
-    type: array
-    items:
-      $ref: "#/definitions/dns_entry"
+    type: object
   dns_entry:
     type: object
     properties:
@@ -147,18 +122,20 @@ definitions:
         type: string
       ipv4:
         type: string
+        format: ipv4
       ipv6:
         type: string
+        format: ipv6
       dkim:
         type: array
         items:
-            type: string
-      socks:
+          type: integer
+          format: uint8
+      ips:
         type: array
         items:
           type: string
-      cookie_secret:
-        type: string
+          format: ipv4
   fail:
     type: object
     properties:

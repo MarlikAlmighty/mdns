@@ -35,7 +35,6 @@ func init() {
   "paths": {
     "/dns": {
       "get": {
-        "security": [],
         "tags": [
           "list"
         ],
@@ -57,7 +56,6 @@ func init() {
         }
       },
       "put": {
-        "security": [],
         "consumes": [
           "application/json; charset=utf-8"
         ],
@@ -95,7 +93,6 @@ func init() {
         }
       },
       "post": {
-        "security": [],
         "consumes": [
           "application/json; charset=utf-8"
         ],
@@ -133,7 +130,6 @@ func init() {
         }
       },
       "delete": {
-        "security": [],
         "tags": [
           "delete"
         ],
@@ -164,7 +160,6 @@ func init() {
     },
     "/dns/{id}": {
       "get": {
-        "security": [],
         "tags": [
           "show"
         ],
@@ -200,18 +195,25 @@ func init() {
       "type": "object",
       "required": [
         "http_port",
-        "certificate",
-        "private_key"
+        "cert_dir",
+        "ipv4",
+        "ipv6",
+        "domain"
       ],
       "properties": {
-        "certificate": {
+        "cert_dir": {
+          "type": "string"
+        },
+        "domain": {
           "type": "string"
         },
         "http_port": {
-          "type": "integer",
-          "format": "unt32"
+          "type": "string"
         },
-        "private_key": {
+        "ipv4": {
+          "type": "string"
+        },
+        "ipv6": {
           "type": "string"
         }
       }
@@ -262,13 +264,6 @@ func init() {
           "type": "string"
         }
       }
-    }
-  },
-  "securityDefinitions": {
-    "key": {
-      "type": "apiKey",
-      "name": "x-token",
-      "in": "header"
     }
   }
 }`))
@@ -290,7 +285,6 @@ func init() {
   "paths": {
     "/dns": {
       "get": {
-        "security": [],
         "tags": [
           "list"
         ],
@@ -312,7 +306,6 @@ func init() {
         }
       },
       "put": {
-        "security": [],
         "consumes": [
           "application/json; charset=utf-8"
         ],
@@ -350,7 +343,6 @@ func init() {
         }
       },
       "post": {
-        "security": [],
         "consumes": [
           "application/json; charset=utf-8"
         ],
@@ -388,7 +380,6 @@ func init() {
         }
       },
       "delete": {
-        "security": [],
         "tags": [
           "delete"
         ],
@@ -419,7 +410,6 @@ func init() {
     },
     "/dns/{id}": {
       "get": {
-        "security": [],
         "tags": [
           "show"
         ],
@@ -455,18 +445,25 @@ func init() {
       "type": "object",
       "required": [
         "http_port",
-        "certificate",
-        "private_key"
+        "cert_dir",
+        "ipv4",
+        "ipv6",
+        "domain"
       ],
       "properties": {
-        "certificate": {
+        "cert_dir": {
+          "type": "string"
+        },
+        "domain": {
           "type": "string"
         },
         "http_port": {
-          "type": "integer",
-          "format": "unt32"
+          "type": "string"
         },
-        "private_key": {
+        "ipv4": {
+          "type": "string"
+        },
+        "ipv6": {
           "type": "string"
         }
       }
@@ -517,13 +514,6 @@ func init() {
           "type": "string"
         }
       }
-    }
-  },
-  "securityDefinitions": {
-    "key": {
-      "type": "apiKey",
-      "name": "x-token",
-      "in": "header"
     }
   }
 }`))

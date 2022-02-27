@@ -12,9 +12,12 @@
 
 ### Run
 ```sh
-$ export HTTP_PORT=3000
-$ export CERTIFICATE="foo"
-$ export PRIVATE_KEY="bar"
+$ export HTTP_PORT="8081"
+$ export UDP_PORT="53"
+$ export CERT_DIR="certs"
+$ export DOMAIN="example.com"
+$ export IPV4="0.0.0.0"
+$ export IPV6="::ffff:0:0"
 ```
 
 ### Docker

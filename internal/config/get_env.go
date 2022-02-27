@@ -4,19 +4,26 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+// Configuration of app
 type Configuration struct {
-	HTTPPort    uint32 `required:"true" split_words:"true"`
-	Certificate string `required:"true"`
-	PrivateKey  string `required:"true" split_words:"true"`
+	CertDir    string `required:"true" split_words:"true"`
+	Domain     string `required:"true"`
+	HTTPPort   string `required:"true" split_words:"true"`
+	UDPPort    string `required:"true" split_words:"true"`
+	IPV4       string `required:"true"`
+	IPV6       string
+	PrivateKey []byte
+	PublicKey  []byte
 }
 
-func New() (*Configuration, error) {
+func New() *Configuration {
+	return &Configuration{}
+}
 
-	var m Configuration
-
-	if err := envconfig.Process("", &m); err != nil {
-		return &Configuration{}, err
+// GetEnv configuration init
+func (cnf *Configuration) GetEnv() error {
+	if err := envconfig.Process("", cnf); err != nil {
+		return err
 	}
-
-	return &m, nil
+	return nil
 }

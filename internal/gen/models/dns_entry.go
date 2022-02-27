@@ -7,9 +7,12 @@ package models
 
 import (
 	"context"
+	"strconv"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // DNSEntry dns entry
@@ -17,27 +20,83 @@ import (
 // swagger:model dns_entry
 type DNSEntry struct {
 
-	// cookie secret
-	CookieSecret string `json:"cookie_secret,omitempty"`
-
 	// dkim
-	Dkim []string `json:"dkim"`
+	Dkim []uint8 `json:"dkim"`
 
 	// domain
 	Domain string `json:"domain,omitempty"`
 
+	// ips
+	Ips []strfmt.IPv4 `json:"ips"`
+
 	// ipv4
-	IPV4 string `json:"ipv4,omitempty"`
+	// Format: ipv4
+	IPV4 strfmt.IPv4 `json:"ipv4,omitempty"`
 
 	// ipv6
-	IPV6 string `json:"ipv6,omitempty"`
-
-	// socks
-	Socks []string `json:"socks"`
+	// Format: ipv6
+	IPV6 strfmt.IPv6 `json:"ipv6,omitempty"`
 }
 
 // Validate validates this dns entry
 func (m *DNSEntry) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateIps(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIPV4(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateIPV6(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *DNSEntry) validateIps(formats strfmt.Registry) error {
+	if swag.IsZero(m.Ips) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Ips); i++ {
+
+		if err := validate.FormatOf("ips"+"."+strconv.Itoa(i), "body", "ipv4", m.Ips[i].String(), formats); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (m *DNSEntry) validateIPV4(formats strfmt.Registry) error {
+	if swag.IsZero(m.IPV4) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("ipv4", "body", "ipv4", m.IPV4.String(), formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DNSEntry) validateIPV6(formats strfmt.Registry) error {
+	if swag.IsZero(m.IPV6) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("ipv6", "body", "ipv6", m.IPV6.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -18,22 +18,16 @@ layout:
       file_name: "get_env.go"
       skip_exists: false
 
+    - name: configInterface
+      source: serverConfiguration
+      target: "./internal/app/"
+      file_name: "configuration.go"
+      skip_exists: false
+
     - name: appPackage
       source: serverApp
       target: "./internal/app"
       file_name: "core_methods.go"
-      skip_exists: false
-
-    - name: loggerPackage
-      source: serverLogger
-      target: "./internal/app"
-      file_name: "logger.go"
-      skip_exists: false
-
-    - name: configurationPackage
-      source: serverConfiguration
-      target: "./internal/app"
-      file_name: "configuration.go"
       skip_exists: false
 
     - name: configure
