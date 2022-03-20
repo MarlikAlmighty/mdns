@@ -18,16 +18,10 @@ layout:
       file_name: "get_env.go"
       skip_exists: false
 
-    - name: configInterface
-      source: serverConfiguration
-      target: "./internal/app/"
-      file_name: "configuration.go"
-      skip_exists: false
-
-    - name: appPackage
-      source: serverApp
+    - name: appContracts
+      source: serverContracts
       target: "./internal/app"
-      file_name: "core_methods.go"
+      file_name: "contracts.go"
       skip_exists: false
 
     - name: configure

@@ -1,17 +1,30 @@
 package config
 
 import (
-	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 	"github.com/kelseyhightower/envconfig"
 )
 
-func New() (*models.Configuration, error) {
+// Configuration of app
+type Configuration struct {
+	FileToDump string `required:"true" split_words:"true"`
+	CertDir    string `required:"true" split_words:"true"`
+	Domain     string `required:"true"`
+	HTTPPort   string `required:"true" split_words:"true"`
+	UDPPort    string `required:"true" split_words:"true"`
+	IPV4       string `required:"true"`
+	IPV6       string
+	PrivateKey []byte
+	PublicKey  []byte
+}
 
-	var m models.Configuration
+func New() *Configuration {
+	return &Configuration{}
+}
 
-	if err := envconfig.Process("", &m); err != nil {
-		return &models.Configuration{}, err
+// GetEnv configuration init
+func (cnf *Configuration) GetEnv() error {
+	if err := envconfig.Process("", cnf); err != nil {
+		return err
 	}
-
-	return &m, nil
+	return nil
 }

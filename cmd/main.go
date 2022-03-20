@@ -1,17 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"encoding/json"
 	"github.com/MarlikAlmighty/mdns/internal/app"
 	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/data"
+	"github.com/MarlikAlmighty/mdns/internal/dns"
+	"github.com/MarlikAlmighty/mdns/internal/dump"
+	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 	apiAdd "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
 	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
-	apiList "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
+
 	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
-	"github.com/MarlikAlmighty/mdns/internal/wrapper"
+
+	apiList "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
 
 	apiUpdate "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/update"
 
@@ -23,56 +28,71 @@ import (
 
 func main() {
 
+	const dumpName = "DUMP"
+
+	// for to catch panic
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered func, we got panic:", r)
+			log.Println("Recovered func, we got panic:", r)
 		}
 	}()
 
+	// get the configuration for the application through ENV
 	c := config.New()
-
 	if err := c.GetEnv(); err != nil {
 		log.Fatal("get environment keys: ", err)
 	}
 
-	// TODO SQLite
-
-	core := app.New(c)
-
-	if err := core.GenerateCerts(); err != nil {
-		log.Fatal("generating certs: ", err)
+	// start store
+	s, err := dump.New(c)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	if c.IPV6 == "" {
-		ipv6, err := core.IPV4ToIPV6(c.IPV4)
-		if err != nil {
-			log.Fatal("convert ipv4 to ipv6: ", err)
+	// ping redis
+	if _, err := s.Client.Ping(context.Background()).Result(); err != nil {
+		log.Fatal(err)
+	}
+
+	// retrieve data from redis
+	var res []byte
+	if res, err = s.Pop(dumpName); err != nil {
+		log.Fatal(err)
+	}
+
+	// we initialize the storage that is in memory
+	var r *data.ResolvedData
+	var m models.DNSEntry
+
+	if len(res) > 0 {
+		if err = json.Unmarshal(res, &m); err != nil {
+			log.Fatal(err)
 		}
-		c.IPV6 = ipv6
-	}
-
-	if crt, key, err := core.CertsFromFile(); err != nil {
-		log.Fatal("get certs from file: ", err)
+		r.Set(m.Domain, &m)
 	} else {
-		c.PublicKey = crt
-		c.PrivateKey = key
+		if r, err = data.New(c); err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	// TODO Change me
-	_ = data.NewResolvedData(c)
+	// starting the application core
+	core := app.New(c, r, s)
 
 	// wrapper over dns lib
-	r := wrapper.New()
-	if err := r.Run(); err != nil {
-		log.Fatal("run dns service: ", err)
-	}
-	defer r.ShutDown()
+	d := dns.Server(c.UDPPort)
+	go func() {
+		if err := d.Run(c.IPV4); err != nil {
+			log.Fatal("run dns service: ", err)
+		}
+	}()
 
-	var (
-		swaggerSpec *loads.Document
-		err         error
-	)
+	defer func() {
+		if err := d.ShutDown(c.IPV4); err != nil {
+			log.Println(err)
+		}
+	}()
 
+	var swaggerSpec *loads.Document
 	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
 		log.Fatal("loads swagger spec", err)
 	}

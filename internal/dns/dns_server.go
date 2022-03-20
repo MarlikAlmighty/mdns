@@ -1,11 +1,13 @@
-package wrapper
+package dns
 
 import (
 	"github.com/MarlikAlmighty/mdns/internal/app"
 	"github.com/miekg/dns"
+	"log"
 	"net"
 )
 
+// TODO Change me
 var (
 	Resolver app.Resolver
 	App      app.App
@@ -16,11 +18,11 @@ type DNS struct {
 	Server *dns.Server
 }
 
-// New simple constructor
-func New() *DNS {
+// Server simple constructor
+func Server(port string) *DNS {
 	return &DNS{
 		Server: &dns.Server{
-			Addr:      ":53",
+			Addr:      port,
 			Net:       "udp",
 			ReusePort: true,
 		},
@@ -28,8 +30,9 @@ func New() *DNS {
 }
 
 // Run start dns server
-func (s *DNS) Run() error {
+func (s *DNS) Run(host string) error {
 	dns.HandleFunc(".", s.Handler())
+	log.Printf("Serving mdns on host %v port %v \n", host, s.Server.Addr)
 	if err := s.Server.ListenAndServe(); err != nil {
 		return err
 	}
@@ -37,7 +40,8 @@ func (s *DNS) Run() error {
 }
 
 // ShutDown stop dns server
-func (s *DNS) ShutDown() error {
+func (s *DNS) ShutDown(host string) error {
+	log.Printf("Stopped serving mdns on host %v port %v \n", host, s.Server.Addr)
 	if err := s.Server.Shutdown(); err != nil {
 		return err
 	}
@@ -144,6 +148,8 @@ func (s *DNS) Handler() dns.HandlerFunc {
 
 			dmarc := []string{"v=DMARC1; pct=1; p=reject; adkim=s; aspf=s"}
 
+			// "v=DKIM1;k=rsa;p=..."
+
 			msg.Answer = append(msg.Answer,
 				&dns.SPF{
 					Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeSPF, Class: dns.ClassINET, Ttl: 60},
@@ -156,6 +162,10 @@ func (s *DNS) Handler() dns.HandlerFunc {
 				&dns.TXT{
 					Hdr: dns.RR_Header{Name: "_domainkey." + domain, Rrtype: dns.TypeTXT, Class: dns.ClassINET, Ttl: 60},
 					Txt: entry.Dkim,
+				},
+				&dns.TXT{
+					Hdr: dns.RR_Header{Name: "_acme-challenge." + domain, Rrtype: dns.TypeTXT, Class: dns.ClassINET, Ttl: 60},
+					Txt: entry.Acme,
 				})
 
 		case dns.TypeMX:
@@ -168,7 +178,7 @@ func (s *DNS) Handler() dns.HandlerFunc {
 		}
 
 		if err := w.WriteMsg(msg); err != nil {
-			panic(err)
+			log.Println(err)
 		}
 	}
 }

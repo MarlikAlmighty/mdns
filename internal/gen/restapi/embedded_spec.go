@@ -191,39 +191,9 @@ func init() {
     }
   },
   "definitions": {
-    "configuration": {
-      "type": "object",
-      "required": [
-        "http_port",
-        "cert_dir",
-        "ipv4",
-        "ipv6",
-        "domain"
-      ],
-      "properties": {
-        "cert_dir": {
-          "type": "string"
-        },
-        "domain": {
-          "type": "string"
-        },
-        "http_port": {
-          "type": "string"
-        },
-        "ipv4": {
-          "type": "string"
-        },
-        "ipv6": {
-          "type": "string"
-        }
-      }
-    },
     "dns_entry": {
       "type": "object",
       "properties": {
-        "cookie_secret": {
-          "type": "string"
-        },
         "dkim": {
           "type": "array",
           "items": {
@@ -233,23 +203,23 @@ func init() {
         "domain": {
           "type": "string"
         },
+        "ips": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "ipv4": {
           "type": "string"
         },
         "ipv6": {
           "type": "string"
-        },
-        "socks": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
     "dns_records": {
-      "type": "array",
-      "items": {
+      "type": "object",
+      "additionalProperties": {
         "$ref": "#/definitions/dns_entry"
       }
     },
@@ -441,39 +411,9 @@ func init() {
     }
   },
   "definitions": {
-    "configuration": {
-      "type": "object",
-      "required": [
-        "http_port",
-        "cert_dir",
-        "ipv4",
-        "ipv6",
-        "domain"
-      ],
-      "properties": {
-        "cert_dir": {
-          "type": "string"
-        },
-        "domain": {
-          "type": "string"
-        },
-        "http_port": {
-          "type": "string"
-        },
-        "ipv4": {
-          "type": "string"
-        },
-        "ipv6": {
-          "type": "string"
-        }
-      }
-    },
     "dns_entry": {
       "type": "object",
       "properties": {
-        "cookie_secret": {
-          "type": "string"
-        },
         "dkim": {
           "type": "array",
           "items": {
@@ -483,23 +423,23 @@ func init() {
         "domain": {
           "type": "string"
         },
+        "ips": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "ipv4": {
           "type": "string"
         },
         "ipv6": {
           "type": "string"
-        },
-        "socks": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
     "dns_records": {
-      "type": "array",
-      "items": {
+      "type": "object",
+      "additionalProperties": {
         "$ref": "#/definitions/dns_entry"
       }
     },

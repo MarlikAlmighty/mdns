@@ -20,7 +20,6 @@ paths:
         '200':
           description: OK
           schema:
-            additionalProperties:
               $ref: "#/definitions/dns_records"
         '400':
           description: Bad request
@@ -115,6 +114,8 @@ paths:
 definitions:
   dns_records:
     type: object
+    additionalProperties:
+      $ref: "#/definitions/dns_entry"
   dns_entry:
     type: object
     properties:
@@ -122,20 +123,28 @@ definitions:
         type: string
       ipv4:
         type: string
-        format: ipv4
       ipv6:
         type: string
-        format: ipv6
       dkim:
         type: array
         items:
-          type: integer
-          format: uint8
+          type: string
       ips:
         type: array
         items:
           type: string
-          format: ipv4
+      acme:
+        type: array
+        items:
+          type: string
+      private_key:
+        type: array
+        items:
+          type: string
+      public_key:
+        type: array
+        items:
+          type: string
   fail:
     type: object
     properties:

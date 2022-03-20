@@ -12,9 +12,10 @@
 
 ### Run
 ```sh
+$ export REDIS_URL="redis://localhost:6379"
 $ export HTTP_PORT="8081"
-$ export UDP_PORT="53"
-$ export CERT_DIR="certs"
+$ export UDP_PORT=":5353"
+$ export CERT_DIRECTORY="https://acme-staging-v02.api.letsencrypt.org/directory"
 $ export DOMAIN="example.com"
 $ export IPV4="0.0.0.0"
 $ export IPV6="::ffff:0:0"

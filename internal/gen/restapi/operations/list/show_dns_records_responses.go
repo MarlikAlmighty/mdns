@@ -51,7 +51,7 @@ func (o *ShowDNSRecordsOK) WriteResponse(rw http.ResponseWriter, producer runtim
 	rw.WriteHeader(200)
 	payload := o.Payload
 	if payload == nil {
-		// return empty array
+		// return empty map
 		payload = models.DNSRecords{}
 	}
 

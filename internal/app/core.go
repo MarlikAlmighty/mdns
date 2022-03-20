@@ -4,11 +4,14 @@ package app
 type Core struct {
 	Config   Config   `config:"-"`
 	Resolver Resolver `resolver:"-"`
+	Store    Store    `store:"-"`
 }
 
 // New application core initialization
-func New(c Config) *Core {
+func New(c Config, r Resolver, s Store) *Core {
 	return &Core{
-		Config: c,
+		Config:   c,
+		Resolver: r,
+		Store:    s,
 	}
 }
