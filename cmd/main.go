@@ -60,20 +60,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// we initialize the storage that is in memory
-	var r *data.ResolvedData
-	var m models.DNSEntry
-
-	if len(res) > 0 {
-		if err = json.Unmarshal(res, &m); err != nil {
-			log.Fatal(err)
-		}
-		r.Set(m.Domain, &m)
-	} else {
-		if r, err = data.New(c); err != nil {
-			log.Fatal(err)
-		}
-	}
+	// new data for records
+	r := data.New()
 
 	// starting the application core
 	core := app.New(c, r, s)
@@ -91,6 +79,20 @@ func main() {
 			log.Println(err)
 		}
 	}()
+
+	// for unmarshall from redis
+	var m models.DNSEntry
+
+	if len(res) > 0 {
+		if err = json.Unmarshal(res, &m); err != nil {
+			log.Fatal(err)
+		}
+		r.Set(m.Domain, &m)
+	} else {
+		if r, err = r.FetchCert(c); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	var swaggerSpec *loads.Document
 	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {

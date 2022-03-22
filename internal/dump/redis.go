@@ -14,7 +14,7 @@ type Store struct {
 
 // New simple constructor
 func New(c *config.Configuration) (*Store, error) {
-	opt, err := redis.ParseURL(c.RedisURl)
+	opt, err := redis.ParseURL(c.RedisUrl)
 	if err != nil {
 		return nil, err
 	}

@@ -14,8 +14,8 @@
 ```sh
 $ export REDIS_URL="redis://localhost:6379"
 $ export HTTP_PORT="8081"
-$ export UDP_PORT=":5353"
-$ export ACME_URl="https://acme-staging-v02.api.letsencrypt.org/directory"
+$ export UDP_PORT="3553"
+$ export ACME_URL="https://acme-staging-v02.api.letsencrypt.org/directory"
 $ export DOMAIN="example.com"
 $ export IPV4="0.0.0.0"
 ```

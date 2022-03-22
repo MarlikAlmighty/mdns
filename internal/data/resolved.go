@@ -29,6 +29,13 @@ type ResolvedData struct {
 	mux     sync.Mutex
 }
 
+// New simple constructor
+func New() *ResolvedData {
+	return &ResolvedData{
+		Records: make(map[string]models.DNSEntry),
+	}
+}
+
 // Set data to map
 func (r *ResolvedData) Set(domain string, md *models.DNSEntry) {
 	r.mux.Lock()
@@ -44,9 +51,8 @@ func (r *ResolvedData) Get(domain string) *models.DNSEntry {
 	return &md
 }
 
-// New simple constructor
-func New(cnf *config.Configuration) (*ResolvedData, error) {
-	var r ResolvedData // TODO Check it
+// FetchCert fetch cert from ai
+func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*ResolvedData, error) {
 	// check domain
 	identifiers := acme.DomainIDs(strings.Fields(cnf.Domain)...)
 	if len(identifiers) == 0 {
@@ -62,7 +68,7 @@ func New(cnf *config.Configuration) (*ResolvedData, error) {
 	}
 	// new client
 	var cl *acme.Client
-	if cl, err = r.newClient(ctx, k, cnf.AcmeURl); err != nil {
+	if cl, err = r.newClient(ctx, k, cnf.AcmeUrl); err != nil {
 		return nil, fmt.Errorf("register: %v", err)
 	}
 	// new order

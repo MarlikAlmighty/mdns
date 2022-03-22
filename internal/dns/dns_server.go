@@ -22,7 +22,7 @@ type DNS struct {
 func Server(port string) *DNS {
 	return &DNS{
 		Server: &dns.Server{
-			Addr:      port,
+			Addr:      ":" + port,
 			Net:       "udp",
 			ReusePort: true,
 		},
