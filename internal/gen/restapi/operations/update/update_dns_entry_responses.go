@@ -69,7 +69,7 @@ type UpdateDNSEntryBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Fail `json:"body,omitempty"`
+	Payload *models.Answer `json:"body,omitempty"`
 }
 
 // NewUpdateDNSEntryBadRequest creates UpdateDNSEntryBadRequest with default headers values
@@ -79,13 +79,13 @@ func NewUpdateDNSEntryBadRequest() *UpdateDNSEntryBadRequest {
 }
 
 // WithPayload adds the payload to the update Dns entry bad request response
-func (o *UpdateDNSEntryBadRequest) WithPayload(payload *models.Fail) *UpdateDNSEntryBadRequest {
+func (o *UpdateDNSEntryBadRequest) WithPayload(payload *models.Answer) *UpdateDNSEntryBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the update Dns entry bad request response
-func (o *UpdateDNSEntryBadRequest) SetPayload(payload *models.Fail) {
+func (o *UpdateDNSEntryBadRequest) SetPayload(payload *models.Answer) {
 	o.Payload = payload
 }
 

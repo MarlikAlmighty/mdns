@@ -72,7 +72,7 @@ type ShowDNSRecordsBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Fail `json:"body,omitempty"`
+	Payload *models.Answer `json:"body,omitempty"`
 }
 
 // NewShowDNSRecordsBadRequest creates ShowDNSRecordsBadRequest with default headers values
@@ -82,13 +82,13 @@ func NewShowDNSRecordsBadRequest() *ShowDNSRecordsBadRequest {
 }
 
 // WithPayload adds the payload to the show Dns records bad request response
-func (o *ShowDNSRecordsBadRequest) WithPayload(payload *models.Fail) *ShowDNSRecordsBadRequest {
+func (o *ShowDNSRecordsBadRequest) WithPayload(payload *models.Answer) *ShowDNSRecordsBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the show Dns records bad request response
-func (o *ShowDNSRecordsBadRequest) SetPayload(payload *models.Fail) {
+func (o *ShowDNSRecordsBadRequest) SetPayload(payload *models.Answer) {
 	o.Payload = payload
 }
 

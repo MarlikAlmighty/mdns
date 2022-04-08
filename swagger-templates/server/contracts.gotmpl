@@ -4,10 +4,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"net"
-
 	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/gen/models"
+	"net"
 )
 
 type (
@@ -36,3 +35,4 @@ func (core *Core) IPV4ToIPV6(ip string) (string, error) {
 	hex.Encode(dst, a)
 	return fmt.Sprintf("0:0:0:0:0:%s:%s:%s", dst[20:24], dst[24:28], dst[28:]), nil
 }
+

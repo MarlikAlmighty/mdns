@@ -1,17 +1,15 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/MarlikAlmighty/mdns/internal/app"
 	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/data"
 	"github.com/MarlikAlmighty/mdns/internal/dns"
 	"github.com/MarlikAlmighty/mdns/internal/dump"
-	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 	apiAdd "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
+
 	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
 
 	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
@@ -22,13 +20,12 @@ import (
 
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/go-openapi/loads"
 )
 
 func main() {
-
-	const dumpName = "DUMP"
 
 	// for to catch panic
 	defer func() {
@@ -38,61 +35,50 @@ func main() {
 	}()
 
 	// get the configuration for the application through ENV
-	c := config.New()
-	if err := c.GetEnv(); err != nil {
+	cnf := config.New()
+	if err := cnf.GetEnv(); err != nil {
 		log.Fatal("get environment keys: ", err)
 	}
 
+	// start new map for domains record
+	dataMap := data.New()
+
+	// TODO run a redis container yourself
 	// start store
-	s, err := dump.New(c)
+	redisClient, err := dump.New(cnf.RedisUrl, dataMap)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("start redis: ", err)
 	}
 
-	// ping redis
-	if _, err := s.Client.Ping(context.Background()).Result(); err != nil {
-		log.Fatal(err)
+	// stop store
+	defer func() {
+		if err = redisClient.Shutdown(cnf.RedisKey); err != nil {
+			log.Printf("stop redis client: %v", err)
+		}
+	}()
+
+	// if we have value in dump, adding it to map
+	if err = redisClient.InitMaps(cnf.RedisKey); err != nil {
+		log.Fatal("redis init map: ", err)
 	}
 
-	// retrieve data from redis
-	var res []byte
-	if res, err = s.Pop(dumpName); err != nil {
-		log.Fatal(err)
-	}
-
-	// new data for records
-	r := data.New()
-
-	// starting the application core
-	core := app.New(c, r, s)
-
-	// wrapper over dns lib
-	d := dns.Server(c.UDPPort)
+	// start dns server
+	dnsServer := dns.New(cnf.UDPPort, dataMap)
 	go func() {
-		if err := d.Run(c.IPV4); err != nil {
+		if err := dnsServer.Run(); err != nil {
 			log.Fatal("run dns service: ", err)
 		}
 	}()
 
+	// stop dns server
 	defer func() {
-		if err := d.ShutDown(c.IPV4); err != nil {
-			log.Println(err)
+		if err = dnsServer.Close(); err != nil {
+			log.Printf("stop dns service: %v", err)
 		}
 	}()
 
-	// for unmarshall from redis
-	var m models.DNSEntry
-
-	if len(res) > 0 {
-		if err = json.Unmarshal(res, &m); err != nil {
-			log.Fatal(err)
-		}
-		r.Set(m.Domain, &m)
-	} else {
-		if r, err = r.FetchCert(c); err != nil {
-			log.Fatal(err)
-		}
-	}
+	// starting the application core
+	core := app.New(dataMap)
 
 	var swaggerSpec *loads.Document
 	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
@@ -111,8 +97,10 @@ func main() {
 
 	server.ConfigureAPI()
 
+	server.GracefulTimeout = 1 * time.Second
+
 	var port int
-	if port, err = strconv.Atoi(c.HTTPPort); err != nil {
+	if port, err = strconv.Atoi(cnf.HTTPPort); err != nil {
 		log.Fatal("can't convert port from string", err)
 	}
 

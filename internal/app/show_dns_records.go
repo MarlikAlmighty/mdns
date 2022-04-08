@@ -5,6 +5,6 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-func (core *Core) ShowDNSRecordsHandler(params apiList.ShowDNSRecordsParams) middleware.Responder {
-	return middleware.NotImplemented("operation list ShowDNSRecords has not yet been implemented")
+func (core *Core) ShowDNSRecordsHandler(_ apiList.ShowDNSRecordsParams) middleware.Responder {
+	return apiList.NewShowDNSRecordsOK().WithPayload(core.Resolver.GetMap())
 }

@@ -7,6 +7,7 @@ import (
 // Configuration of app
 type Configuration struct {
 	RedisUrl string `required:"true" split_words:"true"`
+	RedisKey string `required:"true" split_words:"true"`
 	AcmeUrl  string `required:"true" split_words:"true"`
 	Domain   string `required:"true"`
 	HTTPPort string `required:"true" split_words:"true"`

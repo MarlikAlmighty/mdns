@@ -24,7 +24,7 @@ paths:
         '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/fail"
+            $ref: "#/definitions/answer"
     post:
       tags:
         - add
@@ -48,7 +48,7 @@ paths:
         '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/fail"
+            $ref: "#/definitions/answer"
     put:
       tags:
         - update
@@ -72,7 +72,7 @@ paths:
         '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/fail"
+            $ref: "#/definitions/answer"
     delete:
       tags:
         - delete
@@ -80,17 +80,19 @@ paths:
       operationId: delete_dns_entry
       parameters:
         - in: body
-          name: domain
+          name: delete
           required: true
           schema:
-            type: string
+            $ref: '#/definitions/dns_entry'
       responses:
         '200':
           description: OK
+          schema:
+            $ref: "#/definitions/answer"
         '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/fail"
+            $ref: "#/definitions/answer"
   /dns/{id}:
     get:
       tags:
@@ -110,7 +112,7 @@ paths:
         '400':
           description: Bad request
           schema:
-            $ref: "#/definitions/fail"
+            $ref: "#/definitions/answer"
 definitions:
   dns_records:
     type: object
@@ -145,7 +147,7 @@ definitions:
         type: array
         items:
           type: string
-  fail:
+  answer:
     type: object
     properties:
       Code:

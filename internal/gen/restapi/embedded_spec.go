@@ -50,7 +50,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -87,7 +87,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -124,7 +124,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -137,22 +137,25 @@ func init() {
         "operationId": "delete_dns_entry",
         "parameters": [
           {
-            "name": "domain",
+            "name": "delete",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/dns_entry"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/answer"
+            }
           },
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -183,7 +186,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -191,9 +194,27 @@ func init() {
     }
   },
   "definitions": {
+    "answer": {
+      "type": "object",
+      "properties": {
+        "Code": {
+          "type": "integer",
+          "format": "uint32"
+        },
+        "Message": {
+          "type": "string"
+        }
+      }
+    },
     "dns_entry": {
       "type": "object",
       "properties": {
+        "acme": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "dkim": {
           "type": "array",
           "items": {
@@ -214,6 +235,18 @@ func init() {
         },
         "ipv6": {
           "type": "string"
+        },
+        "private_key": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "public_key": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -221,18 +254,6 @@ func init() {
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/dns_entry"
-      }
-    },
-    "fail": {
-      "type": "object",
-      "properties": {
-        "Code": {
-          "type": "integer",
-          "format": "uint32"
-        },
-        "Message": {
-          "type": "string"
-        }
       }
     }
   }
@@ -270,7 +291,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -307,7 +328,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -344,7 +365,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -357,22 +378,25 @@ func init() {
         "operationId": "delete_dns_entry",
         "parameters": [
           {
-            "name": "domain",
+            "name": "delete",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/dns_entry"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/answer"
+            }
           },
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -403,7 +427,7 @@ func init() {
           "400": {
             "description": "Bad request",
             "schema": {
-              "$ref": "#/definitions/fail"
+              "$ref": "#/definitions/answer"
             }
           }
         }
@@ -411,9 +435,27 @@ func init() {
     }
   },
   "definitions": {
+    "answer": {
+      "type": "object",
+      "properties": {
+        "Code": {
+          "type": "integer",
+          "format": "uint32"
+        },
+        "Message": {
+          "type": "string"
+        }
+      }
+    },
     "dns_entry": {
       "type": "object",
       "properties": {
+        "acme": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "dkim": {
           "type": "array",
           "items": {
@@ -434,6 +476,18 @@ func init() {
         },
         "ipv6": {
           "type": "string"
+        },
+        "private_key": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "public_key": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -441,18 +495,6 @@ func init() {
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/dns_entry"
-      }
-    },
-    "fail": {
-      "type": "object",
-      "properties": {
-        "Code": {
-          "type": "integer",
-          "format": "uint32"
-        },
-        "Message": {
-          "type": "string"
-        }
       }
     }
   }

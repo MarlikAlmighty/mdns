@@ -13,6 +13,7 @@
 ### Run
 ```sh
 $ export REDIS_URL="redis://localhost:6379"
+$ export REDIS_KEY="DUMP"
 $ export HTTP_PORT="8081"
 $ export UDP_PORT="3553"
 $ export ACME_URL="https://acme-staging-v02.api.letsencrypt.org/directory"

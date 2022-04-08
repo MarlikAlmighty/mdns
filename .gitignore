@@ -1,9 +1,1 @@
 .idea/
-certs/
-.dockerignore
-.gitignore
-swagger-api/
-swagger-templates/
-docker-compose.yml
-README.md
-Dockerfile

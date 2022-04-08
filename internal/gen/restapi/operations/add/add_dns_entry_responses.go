@@ -69,7 +69,7 @@ type AddDNSEntryBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Fail `json:"body,omitempty"`
+	Payload *models.Answer `json:"body,omitempty"`
 }
 
 // NewAddDNSEntryBadRequest creates AddDNSEntryBadRequest with default headers values
@@ -79,13 +79,13 @@ func NewAddDNSEntryBadRequest() *AddDNSEntryBadRequest {
 }
 
 // WithPayload adds the payload to the add Dns entry bad request response
-func (o *AddDNSEntryBadRequest) WithPayload(payload *models.Fail) *AddDNSEntryBadRequest {
+func (o *AddDNSEntryBadRequest) WithPayload(payload *models.Answer) *AddDNSEntryBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the add Dns entry bad request response
-func (o *AddDNSEntryBadRequest) SetPayload(payload *models.Fail) {
+func (o *AddDNSEntryBadRequest) SetPayload(payload *models.Answer) {
 	o.Payload = payload
 }
 

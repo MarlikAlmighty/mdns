@@ -21,6 +21,11 @@ const DeleteDNSEntryOKCode int = 200
 swagger:response deleteDnsEntryOK
 */
 type DeleteDNSEntryOK struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Answer `json:"body,omitempty"`
 }
 
 // NewDeleteDNSEntryOK creates DeleteDNSEntryOK with default headers values
@@ -29,12 +34,27 @@ func NewDeleteDNSEntryOK() *DeleteDNSEntryOK {
 	return &DeleteDNSEntryOK{}
 }
 
+// WithPayload adds the payload to the delete Dns entry o k response
+func (o *DeleteDNSEntryOK) WithPayload(payload *models.Answer) *DeleteDNSEntryOK {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete Dns entry o k response
+func (o *DeleteDNSEntryOK) SetPayload(payload *models.Answer) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *DeleteDNSEntryOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(200)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }
 
 // DeleteDNSEntryBadRequestCode is the HTTP code returned for type DeleteDNSEntryBadRequest
@@ -49,7 +69,7 @@ type DeleteDNSEntryBadRequest struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Fail `json:"body,omitempty"`
+	Payload *models.Answer `json:"body,omitempty"`
 }
 
 // NewDeleteDNSEntryBadRequest creates DeleteDNSEntryBadRequest with default headers values
@@ -59,13 +79,13 @@ func NewDeleteDNSEntryBadRequest() *DeleteDNSEntryBadRequest {
 }
 
 // WithPayload adds the payload to the delete Dns entry bad request response
-func (o *DeleteDNSEntryBadRequest) WithPayload(payload *models.Fail) *DeleteDNSEntryBadRequest {
+func (o *DeleteDNSEntryBadRequest) WithPayload(payload *models.Answer) *DeleteDNSEntryBadRequest {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete Dns entry bad request response
-func (o *DeleteDNSEntryBadRequest) SetPayload(payload *models.Fail) {
+func (o *DeleteDNSEntryBadRequest) SetPayload(payload *models.Answer) {
 	o.Payload = payload
 }
 

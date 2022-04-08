@@ -17,7 +17,7 @@ import (
         {{end}}
     {{end}}
 
-	"os"
+	"time"
 	"log"
     "strconv"
     "github.com/go-openapi/loads"
@@ -25,70 +25,59 @@ import (
 
 func main() {
 
-	// to catch panic
-    	defer func() {
-    		if r := recover(); r != nil {
-    			log.Println("Recovered func, we got panic:", r)
-    		}
-    	}()
+	// for to catch panic
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered func, we got panic:", r)
+		}
+	}()
 
-    	// get the configuration for the application through ENV
-    	c := config.New()
-    	if err := c.GetEnv(); err != nil {
-    		log.Fatal("get environment keys: ", err)
-    	}
+	// get the configuration for the application through ENV
+	cnf := config.New()
+	if err := cnf.GetEnv(); err != nil {
+		log.Fatal("get environment keys: ", err)
+	}
 
-    	var w *dump.Wrapper
+	// start new map for domains record
+	dataMap := data.New()
 
-    	// check if we have a data dump
-    	if _, err := os.Stat(c.FileToDump); err != nil {
-    		if os.IsNotExist(err) {
-    			if w, err = dump.New(&c.FileToDump); err != nil {
-    				log.Fatal(err)
-    			}
-    			defer w.DB.Close()
-    		}
-    	}
+	// start store
+	redisClient, err := dump.New(cnf.RedisUrl, dataMap)
+	if err != nil {
+		log.Fatal("start redis: ", err)
+	}
 
-    	// starting the application core
-    	core := app.New(c, w)
+	// stop store
+	defer func() {
+		if err = redisClient.Shutdown(cnf.RedisKey); err != nil {
+			log.Printf("stop redis client: %v", err)
+		}
+	}()
 
-    	// generating host certificates
-    	if err := core.GenerateCerts(); err != nil {
-    		log.Fatal("generating certs: ", err)
-    	}
+	// if we have value in dump, adding it to map
+	if err = redisClient.InitMaps(cnf.RedisKey); err != nil {
+		log.Fatal("redis init map: ", err)
+	}
 
-    	// convert ipv4 to ipv6 and save to model
-    	if c.IPV6 == "" {
-    		ipv6, err := core.IPV4ToIPV6(c.IPV4)
-    		if err != nil {
-    			log.Fatal("convert ipv4 to ipv6: ", err)
-    		}
-    		c.IPV6 = ipv6
-    	}
+	// start dns server
+	dnsServer := dns.New(cnf.UDPPort, dataMap)
+	go func() {
+		if err := dnsServer.Run(); err != nil {
+			log.Fatal("run dns service: ", err)
+		}
+	}()
 
-    	// get certificates from files and save them to the model
-    	if crt, key, err := core.CertsFromFile(); err != nil {
-    		log.Fatal("get certs from file: ", err)
-    	} else {
-    		c.PublicKey = crt
-    		c.PrivateKey = key
-    	}
+	// stop dns server
+	defer func() {
+		if err = dnsServer.Close(); err != nil {
+			log.Printf("stop dns service: %v", err)
+		}
+	}()
 
-    	// TODO Change me
-    	_ = data.NewResolvedData(c)
+	// starting the application core
+	core := app.New(dataMap)
 
-    	// wrapper over dns lib
-    	r := wrapper.New()
-    	if err := r.Run(); err != nil {
-    		log.Fatal("run dns service: ", err)
-    	}
-    	defer r.ShutDown()
-
-    	var (
-    		swaggerSpec *loads.Document
-    		err         error
-    	)
+	var swaggerSpec *loads.Document
 	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
 		log.Fatal("loads swagger spec", err)
 	}
@@ -103,8 +92,10 @@ func main() {
 
 	server.ConfigureAPI()
 
+    server.GracefulTimeout = 1 * time.Second
+
 	var port int
-	if port, err = strconv.Atoi(c.HTTPPort); err != nil {
+	if port, err = strconv.Atoi(cnf.HTTPPort); err != nil {
 		log.Fatal("can't convert port from string", err)
 	}
 

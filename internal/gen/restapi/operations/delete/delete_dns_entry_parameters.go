@@ -6,12 +6,16 @@ package delete
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"io"
 	"net/http"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/validate"
+
+	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 )
 
 // NewDeleteDNSEntryParams creates a new DeleteDNSEntryParams object
@@ -35,7 +39,7 @@ type DeleteDNSEntryParams struct {
 	  Required: true
 	  In: body
 	*/
-	Domain string
+	Delete *models.DNSEntry
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -49,19 +53,30 @@ func (o *DeleteDNSEntryParams) BindRequest(r *http.Request, route *middleware.Ma
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body string
+		var body models.DNSEntry
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("domain", "body", ""))
+				res = append(res, errors.Required("delete", "body", ""))
 			} else {
-				res = append(res, errors.NewParseError("domain", "body", "", err))
+				res = append(res, errors.NewParseError("delete", "body", "", err))
 			}
 		} else {
-			// no validation required on inline body
-			o.Domain = body
+			// validate body object
+			if err := body.Validate(route.Formats); err != nil {
+				res = append(res, err)
+			}
+
+			ctx := validate.WithOperationRequest(context.Background())
+			if err := body.ContextValidate(ctx, route.Formats); err != nil {
+				res = append(res, err)
+			}
+
+			if len(res) == 0 {
+				o.Delete = &body
+			}
 		}
 	} else {
-		res = append(res, errors.Required("domain", "body", ""))
+		res = append(res, errors.Required("delete", "body", ""))
 	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)

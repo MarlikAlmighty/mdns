@@ -12,10 +12,10 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Fail fail
+// Answer answer
 //
-// swagger:model fail
-type Fail struct {
+// swagger:model answer
+type Answer struct {
 
 	// code
 	Code uint32 `json:"Code,omitempty"`
@@ -24,18 +24,18 @@ type Fail struct {
 	Message string `json:"Message,omitempty"`
 }
 
-// Validate validates this fail
-func (m *Fail) Validate(formats strfmt.Registry) error {
+// Validate validates this answer
+func (m *Answer) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this fail based on context it is used
-func (m *Fail) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this answer based on context it is used
+func (m *Answer) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *Fail) MarshalBinary() ([]byte, error) {
+func (m *Answer) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -43,8 +43,8 @@ func (m *Fail) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *Fail) UnmarshalBinary(b []byte) error {
-	var res Fail
+func (m *Answer) UnmarshalBinary(b []byte) error {
+	var res Answer
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

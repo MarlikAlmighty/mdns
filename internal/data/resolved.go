@@ -21,6 +21,10 @@ import (
 type Resolver interface {
 	Set(domain string, md *models.DNSEntry)
 	Get(domain string) *models.DNSEntry
+	Delete(domain string)
+	SetMap(mp map[string]models.DNSEntry)
+	GetMap() map[string]models.DNSEntry
+	FetchCert(cnf *config.Configuration) (*models.DNSEntry, error)
 }
 
 // ResolvedData saved records of dns
@@ -36,14 +40,14 @@ func New() *ResolvedData {
 	}
 }
 
-// Set data to map
+// Set add data to map
 func (r *ResolvedData) Set(domain string, md *models.DNSEntry) {
 	r.mux.Lock()
 	r.Records[domain] = *md
 	r.mux.Unlock()
 }
 
-// Get data from map
+// Get fetch data from map by value
 func (r *ResolvedData) Get(domain string) *models.DNSEntry {
 	r.mux.Lock()
 	md := r.Records[domain]
@@ -51,8 +55,30 @@ func (r *ResolvedData) Get(domain string) *models.DNSEntry {
 	return &md
 }
 
-// FetchCert fetch cert from ai
-func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*ResolvedData, error) {
+// Delete record from map
+func (r *ResolvedData) Delete(domain string) {
+	r.mux.Lock()
+	delete(r.Records, domain)
+	r.mux.Unlock()
+}
+
+// SetMap set all map
+func (r *ResolvedData) SetMap(mp map[string]models.DNSEntry) {
+	r.mux.Lock()
+	r.Records = mp
+	r.mux.Unlock()
+}
+
+// GetMap get all map
+func (r *ResolvedData) GetMap() map[string]models.DNSEntry {
+	r.mux.Lock()
+	mp := r.Records
+	r.mux.Unlock()
+	return mp
+}
+
+// FetchCert fetch cert from ca
+func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*models.DNSEntry, error) {
 	// check domain
 	identifiers := acme.DomainIDs(strings.Fields(cnf.Domain)...)
 	if len(identifiers) == 0 {
@@ -142,7 +168,6 @@ func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*ResolvedData, erro
 	if privateKey, err = r.makePrivateKey(k); err != nil {
 		return nil, err
 	}
-	mp := make(map[string]models.DNSEntry)
 	md := models.DNSEntry{
 		Domain:     cnf.Domain,
 		IPV4:       cnf.IPV4,
@@ -150,8 +175,7 @@ func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*ResolvedData, erro
 		PublicKey:  publicCert,
 		PrivateKey: privateKey,
 	}
-	mp[cnf.Domain] = md
-	return &ResolvedData{Records: mp}, nil
+	return &md, nil
 }
 
 // checkCert verifies the public certificate and returns it

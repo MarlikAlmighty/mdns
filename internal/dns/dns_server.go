@@ -1,47 +1,44 @@
 package dns
 
 import (
-	"github.com/MarlikAlmighty/mdns/internal/app"
+	"github.com/MarlikAlmighty/mdns/internal/data"
 	"github.com/miekg/dns"
 	"log"
 	"net"
-)
-
-// TODO Change me
-var (
-	Resolver app.Resolver
-	App      app.App
+	"strings"
 )
 
 // DNS wrapper over dns server
 type DNS struct {
-	Server *dns.Server
+	Server   *dns.Server
+	Resolver data.Resolver
 }
 
-// Server simple constructor
-func Server(port string) *DNS {
+// New simple constructor
+func New(port string, data data.Resolver) *DNS {
 	return &DNS{
 		Server: &dns.Server{
 			Addr:      ":" + port,
 			Net:       "udp",
 			ReusePort: true,
 		},
+		Resolver: data,
 	}
 }
 
 // Run start dns server
-func (s *DNS) Run(host string) error {
+func (s *DNS) Run() error {
 	dns.HandleFunc(".", s.Handler())
-	log.Printf("Serving mdns on host %v port %v \n", host, s.Server.Addr)
+	log.Printf("Serving mdns on %v \n", s.Server.Addr)
 	if err := s.Server.ListenAndServe(); err != nil {
 		return err
 	}
 	return nil
 }
 
-// ShutDown stop dns server
-func (s *DNS) ShutDown(host string) error {
-	log.Printf("Stopped serving mdns on host %v port %v \n", host, s.Server.Addr)
+// Close stop dns server
+func (s *DNS) Close() error {
+	log.Printf("Stopped serving mdns on %v \n", s.Server.Addr)
 	if err := s.Server.Shutdown(); err != nil {
 		return err
 	}
@@ -60,7 +57,7 @@ func (s *DNS) Handler() dns.HandlerFunc {
 
 		domain := msg.Question[0].Name
 
-		entry := Resolver.Get(domain)
+		entry := s.Resolver.Get(domain)
 
 		switch r.Question[0].Qtype {
 
@@ -124,7 +121,7 @@ func (s *DNS) Handler() dns.HandlerFunc {
 		case dns.TypePTR:
 
 			ipAddress := net.ParseIP(entry.IPV4)
-			reverseIpAddress := App.ReverseIP(ipAddress) + ".in-addr.arpa."
+			reverseIpAddress := s.reverseIP(ipAddress) + ".in-addr.arpa."
 
 			msg.Answer = append(msg.Answer,
 				&dns.PTR{
@@ -181,4 +178,18 @@ func (s *DNS) Handler() dns.HandlerFunc {
 			log.Println(err)
 		}
 	}
+}
+
+// reverseIP reverse ipv4 address for ptr
+func (s *DNS) reverseIP(ip net.IP) string {
+	if ip.To4() != nil {
+		addressSlice := strings.Split(ip.String(), ".")
+		var reverseSlice []string
+		for i := range addressSlice {
+			octet := addressSlice[len(addressSlice)-1-i]
+			reverseSlice = append(reverseSlice, octet)
+		}
+		return strings.Join(reverseSlice, ".")
+	}
+	return ""
 }

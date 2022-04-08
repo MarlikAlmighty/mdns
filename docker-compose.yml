@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - app-tier
+  dnsserver:
+    image: marlikalmighty/mdns:latest
+    ports:
+      - "8081:8081"
+      - "53:53/udp"
+    restart: "always"
+    networks:
+      - app-tier
+
