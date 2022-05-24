@@ -9,7 +9,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 	"golang.org/x/crypto/acme"
 	"strings"
@@ -17,14 +16,15 @@ import (
 	"time"
 )
 
+const acmeURL = "https://acme-staging-v02.api.letsencrypt.org/directory"
+
 // Resolver for assertion
 type Resolver interface {
-	Set(domain string, md *models.DNSEntry)
+	Set(domain string, md *models.DNSEntry) bool
 	Get(domain string) *models.DNSEntry
 	Delete(domain string)
-	SetMap(mp map[string]models.DNSEntry)
 	GetMap() map[string]models.DNSEntry
-	FetchCert(cnf *config.Configuration) (*models.DNSEntry, error)
+	FetchCert(domain, ipv4 string) (*models.DNSEntry, error)
 }
 
 // ResolvedData saved records of dns
@@ -41,10 +41,14 @@ func New() *ResolvedData {
 }
 
 // Set add data to map
-func (r *ResolvedData) Set(domain string, md *models.DNSEntry) {
+func (r *ResolvedData) Set(domain string, md *models.DNSEntry) bool {
 	r.mux.Lock()
+	if _, ok := r.Records[domain]; ok {
+		return true
+	}
 	r.Records[domain] = *md
 	r.mux.Unlock()
+	return false
 }
 
 // Get fetch data from map by value
@@ -62,13 +66,6 @@ func (r *ResolvedData) Delete(domain string) {
 	r.mux.Unlock()
 }
 
-// SetMap set all map
-func (r *ResolvedData) SetMap(mp map[string]models.DNSEntry) {
-	r.mux.Lock()
-	r.Records = mp
-	r.mux.Unlock()
-}
-
 // GetMap get all map
 func (r *ResolvedData) GetMap() map[string]models.DNSEntry {
 	r.mux.Lock()
@@ -78,9 +75,9 @@ func (r *ResolvedData) GetMap() map[string]models.DNSEntry {
 }
 
 // FetchCert fetch cert from ca
-func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*models.DNSEntry, error) {
+func (r *ResolvedData) FetchCert(domain, ipv4 string) (*models.DNSEntry, error) {
 	// check domain
-	identifiers := acme.DomainIDs(strings.Fields(cnf.Domain)...)
+	identifiers := acme.DomainIDs(strings.Fields(domain)...)
 	if len(identifiers) == 0 {
 		return nil, errors.New("at least one domain is required")
 	}
@@ -94,7 +91,7 @@ func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*models.DNSEntry, e
 	}
 	// new client
 	var cl *acme.Client
-	if cl, err = r.newClient(ctx, k, cnf.AcmeUrl); err != nil {
+	if cl, err = r.newClient(ctx, k, acmeURL); err != nil {
 		return nil, fmt.Errorf("register: %v", err)
 	}
 	// new order
@@ -115,15 +112,17 @@ func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*models.DNSEntry, e
 	// adding a token to the map
 	acmeToken := make([]string, 0, len(token))
 	acmeToken = append(acmeToken, token)
-	m := r.Get(cnf.Domain)
-	m.Acme = acmeToken
-	r.Set(cnf.Domain, m)
+	var md models.DNSEntry
+	md.Domain = domain
+	md.IPV4 = ipv4
+	md.Acme = acmeToken
+	r.Set(domain, &md)
 	// accept informs the server that the client accepts one of its challenges
-	if _, err := cl.Accept(ctx, challenge); err != nil {
+	if _, err = cl.Accept(ctx, challenge); err != nil {
 		return nil, fmt.Errorf("accept(%q): %v", challenge.URI, err)
 	}
 	// polls an authorization at the given URL
-	if _, err := cl.WaitAuthorization(ctx, challenge.URI); err != nil {
+	if _, err = cl.WaitAuthorization(ctx, challenge.URI); err != nil {
 		return nil, fmt.Errorf("waitAutorization %v", err)
 	}
 	var urls []string
@@ -149,16 +148,16 @@ func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*models.DNSEntry, e
 	}
 	// RevokeAuthorization relinquishes an existing authorization identified by the given URL
 	for _, v := range urls {
-		if err := cl.RevokeAuthorization(ctx, v); err != nil {
+		if err = cl.RevokeAuthorization(ctx, v); err != nil {
 			return nil, fmt.Errorf("revokAuthorization(%q): %v", v, err)
 		}
 	}
 	// DeactivateReg permanently disables an existing account associated with key
-	if err := cl.DeactivateReg(ctx); err != nil {
+	if err = cl.DeactivateReg(ctx); err != nil {
 		return nil, fmt.Errorf("deactivateReg: %v", err)
 	}
 	// RevokeCert revokes a previously issued certificate cert, provided in DER format
-	if err := cl.RevokeCert(ctx, k, der[0], acme.CRLReasonCessationOfOperation); err != nil {
+	if err = cl.RevokeCert(ctx, k, der[0], acme.CRLReasonCessationOfOperation); err != nil {
 		return nil, fmt.Errorf("revokeCert: %v", err)
 	}
 	// convert public cert []byte to []string
@@ -168,13 +167,11 @@ func (r *ResolvedData) FetchCert(cnf *config.Configuration) (*models.DNSEntry, e
 	if privateKey, err = r.makePrivateKey(k); err != nil {
 		return nil, err
 	}
-	md := models.DNSEntry{
-		Domain:     cnf.Domain,
-		IPV4:       cnf.IPV4,
-		IPV6:       cnf.IPV6,
-		PublicKey:  publicCert,
-		PrivateKey: privateKey,
-	}
+
+	md.PublicKey = publicCert
+	md.PrivateKey = privateKey
+	r.Set(domain, &md)
+
 	return &md, nil
 }
 

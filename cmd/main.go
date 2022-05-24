@@ -5,12 +5,13 @@ import (
 	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/data"
 	"github.com/MarlikAlmighty/mdns/internal/dns"
-	"github.com/MarlikAlmighty/mdns/internal/dump"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 	apiAdd "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
-
 	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
+	"os"
+	"os/signal"
+	"syscall"
 
 	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
 
@@ -27,60 +28,47 @@ import (
 
 func main() {
 
-	// for to catch panic
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("Recovered func, we got panic:", r)
-		}
-	}()
-
 	// get the configuration for the application through ENV
 	cnf := config.New()
 	if err := cnf.GetEnv(); err != nil {
-		log.Fatal("get environment keys: ", err)
+		log.Fatalf("get environment keys: %v\n", err)
 	}
 
 	// start new map for domains record
 	dataMap := data.New()
 
-	// TODO run a redis container yourself
-	// start store
-	redisClient, err := dump.New(cnf.RedisUrl, dataMap)
-	if err != nil {
-		log.Fatal("start redis: ", err)
-	}
+	// for stopping
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	// stop store
-	defer func() {
-		if err = redisClient.Shutdown(cnf.RedisKey); err != nil {
-			log.Printf("stop redis client: %v", err)
-		}
-	}()
-
-	// if we have value in dump, adding it to map
-	if err = redisClient.InitMaps(cnf.RedisKey); err != nil {
-		log.Fatal("redis init map: ", err)
-	}
+	// new dns server
+	dnsServer := dns.New(cnf.NameServers, dataMap)
 
 	// start dns server
-	dnsServer := dns.New(cnf.UDPPort, dataMap)
-	go func() {
-		if err := dnsServer.Run(); err != nil {
-			log.Fatal("run dns service: ", err)
-		}
-	}()
+	if err := dnsServer.Run(); err != nil {
+		log.Fatalf("run dns service: %v", err)
+	}
 
 	// stop dns server
-	defer func() {
-		if err = dnsServer.Close(); err != nil {
-			log.Printf("stop dns service: %v", err)
+	go func() {
+		for {
+			select {
+			case <-shutdown:
+				if err := dnsServer.Close(); err != nil {
+					log.Printf("stop dns service: %v", err)
+				}
+			}
 		}
 	}()
 
 	// starting the application core
-	core := app.New(dataMap)
+	core := app.New(dataMap, cnf)
 
-	var swaggerSpec *loads.Document
+	var (
+		swaggerSpec *loads.Document
+		err         error
+	)
+
 	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
 		log.Fatal("loads swagger spec", err)
 	}
@@ -97,7 +85,7 @@ func main() {
 
 	server.ConfigureAPI()
 
-	server.GracefulTimeout = 1 * time.Second
+	server.GracefulTimeout = 3 * time.Second
 
 	var port int
 	if port, err = strconv.Atoi(cnf.HTTPPort); err != nil {
@@ -105,6 +93,7 @@ func main() {
 	}
 
 	server.Port = port
+	server.Host = "127.0.0.1"
 
 	if err := server.Serve(); err != nil {
 		log.Fatal("start server", err)

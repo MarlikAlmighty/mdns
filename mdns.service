@@ -1,0 +1,21 @@
+[Unit]
+Description=Mdns
+After=network.target
+
+[Service]
+Environment="HTTP_PORT=8081"
+Environment="NAME_SERVERS=1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
+Environment="IPV4=127.0.0.1"
+Type=simple
+PIDFile=/home/marlik/mdns/mdns.pid
+WorkingDirectory=/home/marlik/mdns
+ExecStart=/home/marlik/mdns/bin/mdns
+ExecStop=/bin/kill -INT $MAINPID
+User=root
+Group=root
+StandardOutput=file:/var/log/mdns.log
+StandardError=file:/var/log/mdns.log
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 )
 
@@ -15,14 +14,15 @@ type (
 	App interface {
 		IPV4ToIPV6(ip string) (string, error)
 	}
+	Config interface {
+	}
 	// Resolver methods
 	Resolver interface {
-		Set(domain string, md *models.DNSEntry)
+		Set(domain string, md *models.DNSEntry) bool
 		Get(domain string) *models.DNSEntry
 		Delete(domain string)
-		SetMap(mp map[string]models.DNSEntry)
 		GetMap() map[string]models.DNSEntry
-		FetchCert(cnf *config.Configuration) (*models.DNSEntry, error)
+		FetchCert(domain, ipv4 string) (*models.DNSEntry, error)
 	}
 )
 

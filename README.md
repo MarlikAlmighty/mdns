@@ -12,13 +12,9 @@
 
 ### Run
 ```sh
-$ export REDIS_URL="redis://localhost:6379"
-$ export REDIS_KEY="DUMP"
 $ export HTTP_PORT="8081"
-$ export UDP_PORT="3553"
-$ export ACME_URL="https://acme-staging-v02.api.letsencrypt.org/directory"
-$ export DOMAIN="example.com"
-$ export IPV4="0.0.0.0"
+$ export NAME_SERVERS="1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
+$ export IPV4="127.0.0.1"
 ```
 
 ### Docker

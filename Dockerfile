@@ -17,14 +17,11 @@ FROM scratch
 
 COPY --from=upx /mdns /mdns
 
-ENV REDIS_URL="redis://localhost:6379"
-ENV REDIS_KEY="DUMP"
+#ENV REDIS_URL="redis://redis:6379"
 ENV HTTP_PORT=8081
-ENV UDP_PORT=5353
 ENV ACME_URL="https://acme-staging-v02.api.letsencrypt.org/directory"
-ENV DOMAIN="example.com"
-ENV IPV4="0.0.0.0"
+ENV IPV4="127.0.0.1"
 
-EXPOSE 8081/tcp 5353/udp
+EXPOSE 8081/tcp 53/tcp 53/udp
 
 CMD ["/mdns"]

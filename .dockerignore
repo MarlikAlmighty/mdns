@@ -1,5 +1,6 @@
 .idea/
 .github/
+bin/
 swagger-api/
 swagger-templates/
 .gitignore
