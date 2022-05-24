@@ -6,15 +6,3 @@ services:
     ports:
       - "8081:8081"
       - "53:53"
-  redis:
-    image: bitnami/redis:latest
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    ports:
-      - "6379:6379"
-    volumes:
-      - 'redis_data:/bitnami/redis/data'
-    # restart: "always"
-volumes:
-  redis_data:
-    driver: local
