@@ -17,10 +17,9 @@ FROM scratch
 
 COPY --from=upx /mdns /mdns
 
-#ENV REDIS_URL="redis://redis:6379"
 ENV HTTP_PORT=8081
-ENV ACME_URL="https://acme-staging-v02.api.letsencrypt.org/directory"
-ENV IPV4="127.0.0.1"
+ENV NAME_SERVERS="1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
+ENV DNS_HOST="127.0.0.1"
 
 EXPOSE 8081/tcp 53/tcp 53/udp
 

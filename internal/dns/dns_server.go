@@ -22,14 +22,12 @@ type DNS struct {
 }
 
 // New simple constructor
-func New(nameServers []string, d data.Resolver) *DNS {
+func New(nameServers []string, host string, d data.Resolver) *DNS {
 
 	t, u := &dns.Server{}, &dns.Server{}
 
 	c := &dns.Client{
-		Net:          "tcp",
-		ReadTimeout:  time.Second * 3,
-		WriteTimeout: time.Second * 3,
+		Net: "udp",
 	}
 
 	return &DNS{
@@ -37,6 +35,7 @@ func New(nameServers []string, d data.Resolver) *DNS {
 		UdpServer:   u,
 		Client:      c,
 		Resolver:    d,
+		IPV4:        host,
 		NameServers: nameServers,
 	}
 }
@@ -80,26 +79,40 @@ func (s *DNS) Run() error {
 	return nil
 }
 
-func (s *DNS) Lookup(req *dns.Msg, nameServers []string) (*dns.Msg, error) {
+func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*dns.Msg, error) {
 
 	var (
 		r   *dns.Msg
 		err error
 	)
 
+	answer := make(chan *dns.Msg, 1)
+
 	for _, v := range nameServers {
-		r, _, err = s.Client.Exchange(req, v)
-		if err != nil {
-			return nil, err
-		}
-		if r != nil && r.Rcode == dns.RcodeServerFailure {
-			continue
-		} else if r.Rcode == dns.RcodeSuccess {
-			break
-		}
+
+		go func(v string, answer chan *dns.Msg) {
+
+			r, _, err = s.Client.Exchange(req, v)
+			if err != nil {
+				return
+			}
+
+			if r != nil && r.Rcode == dns.RcodeServerFailure {
+				return
+			}
+
+			if r.Rcode == dns.RcodeSuccess {
+				answer <- r
+			}
+		}(v, answer)
 	}
 
-	return r, nil
+	select {
+	case a := <-answer:
+		return a, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
 }
 
 // Close stop dns server

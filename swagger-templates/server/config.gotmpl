@@ -6,14 +6,9 @@ import (
 
 // Configuration of app
 type Configuration struct {
-	RedisUrl string `required:"true" split_words:"true"`
-	RedisKey string `required:"true" split_words:"true"`
-	AcmeUrl  string `required:"true" split_words:"true"`
-	Domain   string `required:"true"`
-	HTTPPort string `required:"true" split_words:"true"`
-	UDPPort  string `required:"true" split_words:"true"`
-	IPV4     string `required:"true"`
-	IPV6     string
+	HTTPPort    string   `required:"true" split_words:"true"`
+	DnsHost     string   `required:"true" split_words:"true"`
+	NameServers []string `required:"true" split_words:"true"`
 }
 
 func New() *Configuration {

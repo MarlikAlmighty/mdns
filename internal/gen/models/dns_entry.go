@@ -21,7 +21,7 @@ type DNSEntry struct {
 	Acme []string `json:"acme"`
 
 	// dkim
-	Dkim []string `json:"dkim"`
+	Dkim string `json:"dkim,omitempty"`
 
 	// domain
 	Domain string `json:"domain,omitempty"`

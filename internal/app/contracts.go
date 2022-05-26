@@ -18,7 +18,7 @@ type (
 	}
 	// Resolver methods
 	Resolver interface {
-		Set(domain string, md *models.DNSEntry) bool
+		Set(domain string, md *models.DNSEntry)
 		Get(domain string) *models.DNSEntry
 		Delete(domain string)
 		GetMap() map[string]models.DNSEntry
@@ -26,7 +26,7 @@ type (
 	}
 )
 
-// IPV4ToIPV6 convert ipv4 addres to ipv6
+// IPV4ToIPV6 convert ipv4 address to ipv6
 func (core *Core) IPV4ToIPV6(ip string) (string, error) {
 	a := net.ParseIP(ip)
 	if a == nil {
@@ -34,5 +34,5 @@ func (core *Core) IPV4ToIPV6(ip string) (string, error) {
 	}
 	dst := make([]byte, hex.EncodedLen(len(a)))
 	hex.Encode(dst, a)
-	return fmt.Sprintf("0:0:0:0:0:%s:%s:%s", dst[20:24], dst[24:28], dst[28:]), nil
+	return fmt.Sprintf("::%s:%s:%s", dst[20:24], dst[24:28], dst[28:]), nil
 }

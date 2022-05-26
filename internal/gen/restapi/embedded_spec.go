@@ -216,10 +216,7 @@ func init() {
           }
         },
         "dkim": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "type": "string"
         },
         "domain": {
           "type": "string"
@@ -457,10 +454,7 @@ func init() {
           }
         },
         "dkim": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "type": "string"
         },
         "domain": {
           "type": "string"

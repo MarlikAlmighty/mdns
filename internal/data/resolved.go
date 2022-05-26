@@ -20,7 +20,7 @@ const acmeURL = "https://acme-staging-v02.api.letsencrypt.org/directory"
 
 // Resolver for assertion
 type Resolver interface {
-	Set(domain string, md *models.DNSEntry) bool
+	Set(domain string, md *models.DNSEntry)
 	Get(domain string) *models.DNSEntry
 	Delete(domain string)
 	GetMap() map[string]models.DNSEntry
@@ -41,14 +41,10 @@ func New() *ResolvedData {
 }
 
 // Set add data to map
-func (r *ResolvedData) Set(domain string, md *models.DNSEntry) bool {
+func (r *ResolvedData) Set(domain string, md *models.DNSEntry) {
 	r.mux.Lock()
-	if _, ok := r.Records[domain]; ok {
-		return true
-	}
 	r.Records[domain] = *md
 	r.mux.Unlock()
-	return false
 }
 
 // Get fetch data from map by value

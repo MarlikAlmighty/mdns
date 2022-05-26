@@ -128,9 +128,7 @@ definitions:
       ipv6:
         type: string
       dkim:
-        type: array
-        items:
-          type: string
+        type: string
       ips:
         type: array
         items:

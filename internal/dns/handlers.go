@@ -1,72 +1,72 @@
 package dns
 
 import (
+	"context"
+	"fmt"
 	"github.com/miekg/dns"
 	"log"
 	"net"
 	"strings"
+	"time"
 )
 
 // Handler serve dns requests
 func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 
-	defer func() {
-		if err := w.Close(); err != nil {
-			log.Println(err)
-		}
-	}()
+	defer w.Close()
 
 	msg := &dns.Msg{}
 	msg.SetReply(r)
-	src := msg.Question[0].Name
-	domain := strings.ToLower(src)
+	name := msg.Question[0].Name
+	domain := strings.ToLower(name)
 	entry := s.Resolver.Get(domain)
 
-	log.Printf("REQ: %v\n", domain)
+	log.Printf("[REQ]: %v %v\n", msg.Question[0].Name, msg.Question[0].Qtype)
 
 	if entry.Domain == "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		var err error
-		if msg, err = s.Lookup(r, s.NameServers); err != nil {
-			log.Printf("ERROR: %v\n", err.Error())
-			r.SetRcode(r, dns.RcodeServerFailure)
+		if msg, err = s.Lookup(ctx, r, s.NameServers); err != nil {
+			log.Printf("[LOOKUP ERROR]: %v\n", err)
+			return
 		}
-	} else {
+	}
 
-		msg.Authoritative = true
+	msg.Authoritative = true
 
-		switch r.Question[0].Qtype {
+	header := dns.RR_Header{
+		Name:   msg.Question[0].Name,
+		Rrtype: msg.Question[0].Qtype,
+		Class:  dns.ClassINET,
+		Ttl:    60,
+	}
 
-		case dns.TypeA:
+	switch r.Question[0].Qtype {
 
-			/*
-				for _, sock := range entry.Ips {
-					msg.Answer = append(msg.Answer,
-						&dns.A{
-							Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 60},
-							A:   net.ParseIP(sock),
-						})
-				}
-			*/
+	case dns.TypeA:
 
-			msg.Answer = append(msg.Answer,
-				&dns.A{
-					Hdr: dns.RR_Header{
-						Name:   domain,
-						Rrtype: dns.TypeA,
-						Class:  dns.ClassINET,
-						Ttl:    60},
-					A: net.ParseIP(entry.IPV4),
-				})
+		msg.Answer = append(msg.Answer,
+			&dns.A{
+				Hdr: header,
+				A:   net.ParseIP(entry.IPV4),
+			})
 
-		case dns.TypeSOA:
+		if len(entry.Ips) > 0 {
+			for _, sock := range entry.Ips {
+				msg.Answer = append(msg.Answer,
+					&dns.A{
+						Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeA, Class: dns.ClassINET, Ttl: 60},
+						A:   net.ParseIP(sock),
+					})
+			}
+		}
 
-			msg.Answer = append(msg.Answer, &dns.SOA{
-				Hdr: dns.RR_Header{
-					Name:   domain,
-					Rrtype: dns.TypeSOA,
-					Class:  dns.ClassINET,
-					Ttl:    60,
-				},
+	case dns.TypeSOA:
+
+		msg.Answer = append(msg.Answer,
+			&dns.SOA{
+				Hdr:     header,
 				Ns:      "ns1." + domain,
 				Mbox:    "admin." + domain,
 				Serial:  258342863,
@@ -76,105 +76,123 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 				Minttl:  60,
 			})
 
-		case dns.TypeNS:
+	case dns.TypeNS:
 
-			msg.Answer = append(msg.Answer,
-				&dns.NS{
-					Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeNS, Class: dns.ClassINET, Ttl: 60},
-					Ns:  "ns1." + domain,
-				},
-				&dns.NS{
-					Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeNS, Class: dns.ClassINET, Ttl: 60},
-					Ns:  "ns2." + domain,
-				})
+		msg.Answer = append(msg.Answer,
+			&dns.NS{
+				Hdr: header,
+				Ns:  "ns1." + domain,
+			},
+			&dns.NS{
+				Hdr: header,
+				Ns:  "ns2." + domain,
+			})
 
-		case dns.TypeAAAA:
+	case dns.TypeAAAA:
 
-			msg.Answer = append(msg.Answer, &dns.AAAA{
-				Hdr:  dns.RR_Header{Name: domain, Rrtype: dns.TypeAAAA, Class: dns.ClassINET, Ttl: 60},
+		msg.Answer = append(msg.Answer,
+			&dns.AAAA{
+				Hdr:  header,
 				AAAA: net.ParseIP(entry.IPV6),
 			})
 
-		case dns.TypePTR:
+	case dns.TypePTR:
 
-			ipAddress := net.ParseIP(entry.IPV4)
-			reverseIpAddress := s.reverseIP(ipAddress) + ".in-addr.arpa."
+		ipAddress := net.ParseIP(entry.IPV4)
+		reverseIpAddress := s.reverseIP(ipAddress) + ".in-addr.arpa."
 
-			msg.Answer = append(msg.Answer,
-				&dns.PTR{
-					Hdr: dns.RR_Header{Name: reverseIpAddress, Rrtype: dns.TypePTR, Class: dns.ClassINET, Ttl: 60},
-					Ptr: domain,
-				})
-
-		case dns.TypeSPF:
-
-			spf := []string{"v=spf1 a mx ptr all"}
-
-			msg.Answer = append(msg.Answer,
-				&dns.SPF{
-					Hdr: dns.RR_Header{
-						Name:   domain,
-						Rrtype: dns.TypeSPF,
-						Class:  dns.ClassINET,
-						Ttl:    60,
-					},
-					Txt: spf,
-				})
-
-		case dns.TypeTXT:
-
-			//spf := []string{"v=spf1 a mx ptr all"}
-
-			//dmarc := []string{"v=DMARC1; pct=1; p=reject; adkim=s; aspf=s"}
-
-			// "v=DKIM1;k=rsa;p=..."
-
-			msg.Answer = append(msg.Answer,
-				/*
-					&dns.SPF{
-						Hdr: dns.RR_Header{Name: domain, Rrtype: dns.TypeSPF, Class: dns.ClassINET, Ttl: 60},
-						Txt: spf,
-					},
-					&dns.TXT{
-						Hdr: dns.RR_Header{Name: "_dmarc." + domain, Rrtype: dns.TypeTXT, Class: dns.ClassINET, Ttl: 60},
-						Txt: dmarc,
-					},
-					&dns.TXT{
-						Hdr: dns.RR_Header{Name: "_domainkey." + domain, Rrtype: dns.TypeTXT, Class: dns.ClassINET, Ttl: 60},
-						Txt: entry.Dkim,
-					},
-				*/
-				&dns.TXT{
-					Hdr: dns.RR_Header{
-						Name:   "_acme-challenge." + domain,
-						Rrtype: dns.TypeTXT,
-						Class:  dns.ClassINET,
-						Ttl:    60},
-					Txt: entry.Acme,
-				})
-
-		case dns.TypeMX:
-
-			msg.Answer = append(msg.Answer, &dns.MX{
+		msg.Answer = append(msg.Answer,
+			&dns.PTR{
 				Hdr: dns.RR_Header{
-					Name:   domain,
-					Rrtype: dns.TypeMX,
+					Name:   reverseIpAddress,
+					Rrtype: dns.TypePTR,
 					Class:  dns.ClassINET,
-					Ttl:    60,
-				},
-				Preference: 10,
-				Mx:         "mail." + domain,
+					Ttl:    60},
+				Ptr: domain,
 			})
-		}
+
+	case dns.TypeSPF:
+
+		spf := []string{"v=spf1 a mx ptr all"}
+
+		msg.Answer = append(msg.Answer,
+			&dns.SPF{
+				Hdr: header,
+				Txt: spf,
+			})
+
+	case dns.TypeTXT:
+
+		var (
+			dkim []string
+			adsp []string
+		)
+
+		outDot := strings.TrimSuffix(domain, ".")
+		spf := []string{"v=spf1 a mx ptr all"}
+		spf2 := []string{"v=spf1 include:_spf." + outDot + " ~all"}
+		dmarc := []string{"v=DMARC1; pct=1; p=reject; adkim=s; aspf=s"}
+		dkim = append(dkim, fmt.Sprintf("v=DKIM1; k=rsa; t=s; p=%s", entry.Dkim))
+		adsp = append(adsp, "dkim=all")
+
+		msg.Answer = append(msg.Answer,
+
+			&dns.SPF{
+				Hdr: header,
+				Txt: spf,
+			},
+			&dns.TXT{
+				Hdr: header,
+				Txt: spf2,
+			},
+			&dns.TXT{
+				Hdr: dns.RR_Header{
+					Name:   "_dmarc." + domain,
+					Rrtype: dns.TypeTXT,
+					Class:  dns.ClassINET,
+					Ttl:    60},
+				Txt: dmarc,
+			},
+			&dns.TXT{
+				Hdr: dns.RR_Header{
+					Name:   "mail._domainkey." + domain,
+					Rrtype: dns.TypeTXT,
+					Class:  dns.ClassINET, Ttl: 60},
+				Txt: dkim,
+			},
+			&dns.TXT{
+				Hdr: dns.RR_Header{
+					Name:   "_adsp._domainkey." + domain,
+					Rrtype: dns.TypeTXT,
+					Class:  dns.ClassINET, Ttl: 60},
+				Txt: adsp,
+			},
+			&dns.TXT{
+				Hdr: dns.RR_Header{
+					Name:   "_acme-challenge." + domain,
+					Rrtype: dns.TypeTXT,
+					Class:  dns.ClassINET,
+					Ttl:    60},
+				Txt: entry.Acme,
+			})
+
+	case dns.TypeMX:
+
+		msg.Answer = append(msg.Answer, &dns.MX{
+			Hdr:        header,
+			Preference: 10,
+			Mx:         "mail." + domain,
+		})
+		msg.Answer = append(msg.Answer, &dns.MX{
+			Hdr:        header,
+			Preference: 10,
+			Mx:         "smtp." + domain,
+		})
 	}
 
-	for k, v := range msg.Answer {
-		log.Printf("RESP: %v %v\n", k, v)
+	if len(msg.Answer) > 0 {
+		log.Printf("[RESP]: %v\n", msg.Answer)
 	}
 
-	if err := w.WriteMsg(msg); err != nil {
-		log.Printf("WRITE MSG: %v\n", err.Error())
-	}
-
-	return
+	w.WriteMsg(msg)
 }

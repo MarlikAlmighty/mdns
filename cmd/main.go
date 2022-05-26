@@ -8,10 +8,8 @@ import (
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 	apiAdd "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
+
 	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
-	"os"
-	"os/signal"
-	"syscall"
 
 	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
 
@@ -20,7 +18,10 @@ import (
 	apiUpdate "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/update"
 
 	"log"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/go-openapi/loads"
@@ -37,17 +38,17 @@ func main() {
 	// start new map for domains record
 	dataMap := data.New()
 
-	// for stopping
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-
 	// new dns server
-	dnsServer := dns.New(cnf.NameServers, dataMap)
+	dnsServer := dns.New(cnf.NameServers, cnf.DnsHost, dataMap)
 
 	// start dns server
 	if err := dnsServer.Run(); err != nil {
 		log.Fatalf("run dns service: %v", err)
 	}
+
+	// for stopping
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	// stop dns server
 	go func() {
@@ -56,6 +57,7 @@ func main() {
 			case <-shutdown:
 				if err := dnsServer.Close(); err != nil {
 					log.Printf("stop dns service: %v", err)
+					return
 				}
 			}
 		}
@@ -85,17 +87,16 @@ func main() {
 
 	server.ConfigureAPI()
 
-	server.GracefulTimeout = 3 * time.Second
-
 	var port int
 	if port, err = strconv.Atoi(cnf.HTTPPort); err != nil {
 		log.Fatal("can't convert port from string", err)
 	}
 
+	server.GracefulTimeout = 3 * time.Second
 	server.Port = port
 	server.Host = "127.0.0.1"
 
-	if err := server.Serve(); err != nil {
+	if err = server.Serve(); err != nil {
 		log.Fatal("start server", err)
 	}
 }

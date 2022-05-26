@@ -7,8 +7,8 @@ import (
 // Configuration of app
 type Configuration struct {
 	HTTPPort    string   `required:"true" split_words:"true"`
+	DnsHost     string   `required:"true" split_words:"true"`
 	NameServers []string `required:"true" split_words:"true"`
-	IPV4        string
 }
 
 func New() *Configuration {
