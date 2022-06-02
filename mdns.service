@@ -8,13 +8,13 @@ Environment="NAME_SERVERS=1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
 Environment="IPV4=127.0.0.1"
 Type=simple
 PIDFile=/run/mdns.pid
-WorkingDirectory=/home/marlik/mdns
-ExecStart=/home/marlik/mdns/bin/mdns
+WorkingDirectory=/home/user/mdns
+ExecStart=/home/user/mdns/bin/mdns
 ExecStop=/bin/kill -INT $MAINPID
 User=root
 Group=root
-StandardOutput=file:/var/log/mdns.log
-StandardError=file:/var/log/mdns.log
+StandardOutput=append:/var/log/mdns.log
+StandardError=append:/var/log/mdns.log
 Restart=always
 
 [Install]

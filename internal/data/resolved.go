@@ -5,7 +5,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -25,6 +27,9 @@ type Resolver interface {
 	Delete(domain string)
 	GetMap() map[string]models.DNSEntry
 	FetchCert(domain, ipv4 string) (*models.DNSEntry, error)
+	GenerateRsaKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error)
+	ExportRsaPrivateKeyAsStr(privKey *rsa.PrivateKey) string
+	ExportRsaPublicKeyAsStr(pubKey *rsa.PublicKey) (string, error)
 }
 
 // ResolvedData saved records of dns
@@ -70,17 +75,22 @@ func (r *ResolvedData) GetMap() map[string]models.DNSEntry {
 	return mp
 }
 
+/*
+Start block for fetch HTTP certs
+*/
+
 // FetchCert fetch cert from ca
 func (r *ResolvedData) FetchCert(domain, ipv4 string) (*models.DNSEntry, error) {
+	outDot := strings.TrimSuffix(domain, ".")
 	// check domain
-	identifiers := acme.DomainIDs(strings.Fields(domain)...)
+	identifiers := acme.DomainIDs(strings.Fields(outDot)...)
 	if len(identifiers) == 0 {
 		return nil, errors.New("at least one domain is required")
 	}
 	// context with cancel
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
-	// create and register a new account.
+	// create a new private key for account.
 	k, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("ecdsa.GenerateKey for a cert: %v", err)
@@ -105,13 +115,10 @@ func (r *ResolvedData) FetchCert(domain, ipv4 string) (*models.DNSEntry, error) 
 	if token, err = cl.DNS01ChallengeRecord(challenge.Token); err != nil {
 		return nil, fmt.Errorf("dns01ChallengeRecord: %v", err)
 	}
-	// adding a token to the map
-	acmeToken := make([]string, 0, len(token))
-	acmeToken = append(acmeToken, token)
 	var md models.DNSEntry
 	md.Domain = domain
 	md.IPV4 = ipv4
-	md.Acme = acmeToken
+	md.Acme = []string{token}
 	r.Set(domain, &md)
 	// accept informs the server that the client accepts one of its challenges
 	if _, err = cl.Accept(ctx, challenge); err != nil {
@@ -124,12 +131,17 @@ func (r *ResolvedData) FetchCert(domain, ipv4 string) (*models.DNSEntry, error) 
 	var urls []string
 	urls = append(urls, challenge.URI)
 	// polls an order from the given URL
-	if _, err := cl.WaitOrder(ctx, o.URI); err != nil {
+	if _, err = cl.WaitOrder(ctx, o.URI); err != nil {
 		return nil, fmt.Errorf("waitOrder(%q): %v", o.URI, err)
+	}
+	// create a new private key for certs
+	var newKey *ecdsa.PrivateKey
+	if newKey, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader); err != nil {
+		return nil, fmt.Errorf("ecdsa.GenerateKey for a cert: %v", err)
 	}
 	// create csr
 	var csr []byte
-	if csr, err = r.newCSR(identifiers, k); err != nil {
+	if csr, err = r.newCSR(identifiers, newKey); err != nil {
 		return nil, err
 	}
 	// submits the CSR (Certificate Signing Request) to a CA at the specified URL
@@ -153,21 +165,20 @@ func (r *ResolvedData) FetchCert(domain, ipv4 string) (*models.DNSEntry, error) 
 		return nil, fmt.Errorf("deactivateReg: %v", err)
 	}
 	// RevokeCert revokes a previously issued certificate cert, provided in DER format
-	if err = cl.RevokeCert(ctx, k, der[0], acme.CRLReasonCessationOfOperation); err != nil {
+	if err = cl.RevokeCert(ctx, newKey, der[0], acme.CRLReasonCessationOfOperation); err != nil {
 		return nil, fmt.Errorf("revokeCert: %v", err)
 	}
 	// convert public cert []byte to []string
-	publicCert := r.makePublicCert(cert)
+	publicCert := r.exportPublicCert(cert)
 	// convert private cert []byte to []string
-	var privateKey []string
-	if privateKey, err = r.makePrivateKey(k); err != nil {
+	var privateKey string
+	if privateKey, err = r.exportEDSAtPrivateKey(newKey); err != nil {
 		return nil, err
 	}
-
-	md.PublicKey = publicCert
-	md.PrivateKey = privateKey
+	md.Acme = []string{""}
+	md.HTTPPublicKey = publicCert
+	md.HTTPPrivateKey = privateKey
 	r.Set(domain, &md)
-
 	return &md, nil
 }
 
@@ -187,7 +198,7 @@ func (r *ResolvedData) checkCert(derChain [][]byte, id []acme.AuthzID) ([]byte, 
 		}
 		publicCert = b
 		for _, v := range id {
-			if err := crt.VerifyHostname(v.Value); err != nil {
+			if err = crt.VerifyHostname(v.Value); err != nil {
 				return nil, err
 			}
 		}
@@ -250,24 +261,44 @@ func (r *ResolvedData) newClient(ctx context.Context, k *ecdsa.PrivateKey, direc
 	return cl, nil
 }
 
-// makePrivateKey creates a private pem block
-func (r *ResolvedData) makePrivateKey(k *ecdsa.PrivateKey) ([]string, error) {
+// exportEDSAPrivateKey creates a private pem block
+func (r *ResolvedData) exportEDSAtPrivateKey(k *ecdsa.PrivateKey) (string, error) {
 	key, err := x509.MarshalECPrivateKey(k)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	block := pem.Block{Type: "ECDSA PRIVATE KEY", Bytes: key}
 	ky := pem.EncodeToMemory(&block)
-	newKey := make([]string, 0, len(ky))
-	newKey = append(newKey, string(ky))
-	return newKey, nil
+	return string(ky), nil
 }
 
-// makePublicCert creates a public pem block
-func (r *ResolvedData) makePublicCert(b []byte) []string {
+// exportPublicCert creates a public pem block
+func (r *ResolvedData) exportPublicCert(b []byte) string {
 	p := &pem.Block{Type: "CERTIFICATE", Bytes: b}
 	c := pem.EncodeToMemory(p)
-	newCert := make([]string, 0, len(c))
-	newCert = append(newCert, string(c))
-	return newCert
+	return string(c)
+}
+
+/*
+Start block for generate RSA keys
+*/
+
+func (r *ResolvedData) GenerateRsaKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, nil, err
+	}
+	return privKey, &privKey.PublicKey, nil
+}
+
+func (r *ResolvedData) ExportRsaPrivateKeyAsStr(privKey *rsa.PrivateKey) string {
+	return base64.StdEncoding.EncodeToString(x509.MarshalPKCS1PrivateKey(privKey))
+}
+
+func (r *ResolvedData) ExportRsaPublicKeyAsStr(pubKey *rsa.PublicKey) (string, error) {
+	pu, err := x509.MarshalPKIXPublicKey(pubKey)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(pu), nil
 }

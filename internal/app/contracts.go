@@ -1,6 +1,7 @@
 package app
 
 import (
+	"crypto/rsa"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -23,6 +24,9 @@ type (
 		Delete(domain string)
 		GetMap() map[string]models.DNSEntry
 		FetchCert(domain, ipv4 string) (*models.DNSEntry, error)
+		GenerateRsaKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error)
+		ExportRsaPrivateKeyAsStr(privKey *rsa.PrivateKey) string
+		ExportRsaPublicKeyAsStr(pubKey *rsa.PublicKey) (string, error)
 	}
 )
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
+	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/certs"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
@@ -50,6 +51,11 @@ func configureAPI(api *operations.MdnsAPI) http.Handler {
 	if api.DeleteDeleteDNSEntryHandler == nil {
 		api.DeleteDeleteDNSEntryHandler = delete.DeleteDNSEntryHandlerFunc(func(params delete.DeleteDNSEntryParams) middleware.Responder {
 			return middleware.NotImplemented("operation delete.DeleteDNSEntry has not yet been implemented")
+		})
+	}
+	if api.CertsFetchCertsHandler == nil {
+		api.CertsFetchCertsHandler = certs.FetchCertsHandlerFunc(func(params certs.FetchCertsParams) middleware.Responder {
+			return middleware.NotImplemented("operation certs.FetchCerts has not yet been implemented")
 		})
 	}
 	if api.ShowListOneDNSEntryHandler == nil {

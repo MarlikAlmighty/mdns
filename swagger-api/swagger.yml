@@ -113,6 +113,31 @@ paths:
           description: Bad request
           schema:
             $ref: "#/definitions/answer"
+  /dns/cert:
+    post:
+      tags:
+        - certs
+      summary: Fetch certs
+      operationId: fetch_certs
+      consumes:
+        - "application/json; charset=utf-8"
+      produces:
+        - "application/json; charset=utf-8"
+      parameters:
+        - in: body
+          name: certs
+          required: true
+          schema:
+            $ref: '#/definitions/dns_entry'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/dns_entry'
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/answer"
 definitions:
   dns_records:
     type: object
@@ -127,8 +152,10 @@ definitions:
         type: string
       ipv6:
         type: string
-      dkim:
-        type: string
+      dkim_private_key:
+          type: string
+      dkim_public_key:
+          type: string
       ips:
         type: array
         items:
@@ -137,14 +164,10 @@ definitions:
         type: array
         items:
           type: string
-      private_key:
-        type: array
-        items:
-          type: string
-      public_key:
-        type: array
-        items:
-          type: string
+      http_private_key:
+        type: string
+      http_public_key:
+        type: string
   answer:
     type: object
     properties:

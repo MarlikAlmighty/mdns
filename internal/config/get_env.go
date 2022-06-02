@@ -9,6 +9,7 @@ type Configuration struct {
 	HTTPPort    string   `required:"true" split_words:"true"`
 	DnsHost     string   `required:"true" split_words:"true"`
 	NameServers []string `required:"true" split_words:"true"`
+	IPV6        bool     `required:"true"`
 }
 
 func New() *Configuration {

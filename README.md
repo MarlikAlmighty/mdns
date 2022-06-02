@@ -14,7 +14,8 @@
 ```sh
 $ export HTTP_PORT="8081"
 $ export NAME_SERVERS="1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
-$ export DNS_HOST="127.0.0.1"
+$ export DNS_HOST="0.0.0.0"
+$ export IPV6="false"
 ```
 
 ### Docker

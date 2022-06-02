@@ -20,11 +20,20 @@ type DNSEntry struct {
 	// acme
 	Acme []string `json:"acme"`
 
-	// dkim
-	Dkim string `json:"dkim,omitempty"`
+	// dkim private key
+	DkimPrivateKey string `json:"dkim_private_key,omitempty"`
+
+	// dkim public key
+	DkimPublicKey string `json:"dkim_public_key,omitempty"`
 
 	// domain
 	Domain string `json:"domain,omitempty"`
+
+	// http private key
+	HTTPPrivateKey string `json:"http_private_key,omitempty"`
+
+	// http public key
+	HTTPPublicKey string `json:"http_public_key,omitempty"`
 
 	// ips
 	Ips []string `json:"ips"`
@@ -34,12 +43,6 @@ type DNSEntry struct {
 
 	// ipv6
 	IPV6 string `json:"ipv6,omitempty"`
-
-	// private key
-	PrivateKey []string `json:"private_key"`
-
-	// public key
-	PublicKey []string `json:"public_key"`
 }
 
 // Validate validates this dns entry

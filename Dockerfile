@@ -20,6 +20,7 @@ COPY --from=upx /mdns /mdns
 ENV HTTP_PORT=8081
 ENV NAME_SERVERS="1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
 ENV DNS_HOST="127.0.0.1"
+ENV IPV6="false"
 
 EXPOSE 8081/tcp 53/tcp 53/udp
 

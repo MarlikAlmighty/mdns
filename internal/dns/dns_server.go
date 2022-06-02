@@ -98,6 +98,7 @@ func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*
 			}
 
 			if r != nil && r.Rcode == dns.RcodeServerFailure {
+				answer <- r.SetRcodeFormatError(r)
 				return
 			}
 
@@ -118,7 +119,7 @@ func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*
 // Close stop dns server
 func (s *DNS) Close() error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	var errs []string

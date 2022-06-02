@@ -11,6 +11,8 @@ import (
 
 	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
 
+	apiCerts "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/certs"
+
 	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
 
 	apiList "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
@@ -79,6 +81,7 @@ func main() {
 
 	api.AddAddDNSEntryHandler = apiAdd.AddDNSEntryHandlerFunc(core.AddDNSEntryHandler)
 	api.DeleteDeleteDNSEntryHandler = apiDelete.DeleteDNSEntryHandlerFunc(core.DeleteDNSEntryHandler)
+	api.CertsFetchCertsHandler = apiCerts.FetchCertsHandlerFunc(core.FetchCertsHandler)
 	api.ShowListOneDNSEntryHandler = apiShow.ListOneDNSEntryHandlerFunc(core.ListOneDNSEntryHandler)
 	api.ListShowDNSRecordsHandler = apiList.ShowDNSRecordsHandlerFunc(core.ShowDNSRecordsHandler)
 	api.UpdateUpdateDNSEntryHandler = apiUpdate.UpdateDNSEntryHandlerFunc(core.UpdateDNSEntryHandler)
