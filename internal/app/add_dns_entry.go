@@ -11,7 +11,6 @@ func (core *Core) AddDNSEntryHandler(params apiAdd.AddDNSEntryParams) middleware
 
 	md := core.Resolver.Get(params.Add.Domain)
 
-	// TODO VALIDATE IPV4 ETC
 	ipv6, err := core.IPV4ToIPV6(params.Add.IPV4)
 	if err != nil {
 		return apiAdd.NewAddDNSEntryBadRequest().WithPayload(&models.Answer{
@@ -42,9 +41,9 @@ func (core *Core) AddDNSEntryHandler(params apiAdd.AddDNSEntryParams) middleware
 		})
 	}
 
-	// TODO VALIDATE earlier
-	if md.Domain == "" {
+	if md.Domain == "" || md.IPV4 == "" {
 		md.Domain = params.Add.Domain
+		md.IPV4 = params.Add.IPV4
 	}
 
 	md.DkimPrivateKey = core.ExportRsaPrivateKeyAsStr(privRSA)

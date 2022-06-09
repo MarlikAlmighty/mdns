@@ -6,5 +6,5 @@ import (
 )
 
 func (core *Core) ListOneDNSEntryHandler(params apiShow.ListOneDNSEntryParams) middleware.Responder {
-	return apiShow.NewListOneDNSEntryOK().WithPayload(core.Resolver.Get(params.ID))
+	return apiShow.NewListOneDNSEntryOK().WithPayload(core.Resolver.Get(params.Domain))
 }

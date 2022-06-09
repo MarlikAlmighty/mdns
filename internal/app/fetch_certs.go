@@ -8,6 +8,7 @@ import (
 )
 
 func (core *Core) FetchCertsHandler(params apiCerts.FetchCertsParams) middleware.Responder {
+
 	md, err := core.FetchCert(params.Certs.Domain, params.Certs.IPV4)
 	if err != nil {
 		return apiAdd.NewAddDNSEntryBadRequest().WithPayload(&models.Answer{
@@ -15,5 +16,6 @@ func (core *Core) FetchCertsHandler(params apiCerts.FetchCertsParams) middleware
 			Message: err.Error(),
 		})
 	}
+
 	return apiCerts.NewFetchCertsOK().WithPayload(md)
 }

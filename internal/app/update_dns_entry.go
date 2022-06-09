@@ -7,6 +7,7 @@ import (
 )
 
 func (core *Core) UpdateDNSEntryHandler(params apiUpdate.UpdateDNSEntryParams) middleware.Responder {
+
 	m := core.Resolver.Get(params.Update.Domain)
 	if m.Domain == "" {
 		return apiUpdate.NewUpdateDNSEntryBadRequest().WithPayload(&models.Answer{
@@ -14,7 +15,9 @@ func (core *Core) UpdateDNSEntryHandler(params apiUpdate.UpdateDNSEntryParams) m
 			Message: "domain does not exist",
 		})
 	}
+
 	m.Domain = params.Update.Domain
+	m.IPV4 = params.Update.IPV4
 	m.Ips = params.Update.Ips
 	core.Resolver.Set(m.Domain, m)
 	return apiUpdate.NewUpdateDNSEntryOK().WithPayload(m)

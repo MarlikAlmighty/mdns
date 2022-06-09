@@ -24,7 +24,7 @@ func NewListOneDNSEntryParams() ListOneDNSEntryParams {
 // ListOneDNSEntryParams contains all the bound params for the list one dns entry operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters list_one__dns_entry
+// swagger:parameters list_one_dns_entry
 type ListOneDNSEntryParams struct {
 
 	// HTTP Request Object
@@ -34,7 +34,7 @@ type ListOneDNSEntryParams struct {
 	  Required: true
 	  In: path
 	*/
-	ID string
+	Domain string
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -46,8 +46,8 @@ func (o *ListOneDNSEntryParams) BindRequest(r *http.Request, route *middleware.M
 
 	o.HTTPRequest = r
 
-	rID, rhkID, _ := route.Params.GetOK("id")
-	if err := o.bindID(rID, rhkID, route.Formats); err != nil {
+	rDomain, rhkDomain, _ := route.Params.GetOK("domain")
+	if err := o.bindDomain(rDomain, rhkDomain, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -56,8 +56,8 @@ func (o *ListOneDNSEntryParams) BindRequest(r *http.Request, route *middleware.M
 	return nil
 }
 
-// bindID binds and validates parameter ID from path.
-func (o *ListOneDNSEntryParams) bindID(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindDomain binds and validates parameter Domain from path.
+func (o *ListOneDNSEntryParams) bindDomain(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -65,7 +65,7 @@ func (o *ListOneDNSEntryParams) bindID(rawData []string, hasKey bool, formats st
 
 	// Required: true
 	// Parameter is provided by construction from the route
-	o.ID = raw
+	o.Domain = raw
 
 	return nil
 }

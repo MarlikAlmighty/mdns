@@ -200,17 +200,17 @@ func init() {
         }
       }
     },
-    "/dns/{id}": {
+    "/dns/{domain}": {
       "get": {
         "tags": [
           "show"
         ],
         "summary": "List one dns entry",
-        "operationId": "list_one__dns_entry",
+        "operationId": "list_one_dns_entry",
         "parameters": [
           {
             "type": "string",
-            "name": "id",
+            "name": "domain",
             "in": "path",
             "required": true
           }
@@ -254,10 +254,19 @@ func init() {
             "type": "string"
           }
         },
-        "dkim": {
+        "dkim_private_key": {
+          "type": "string"
+        },
+        "dkim_public_key": {
           "type": "string"
         },
         "domain": {
+          "type": "string"
+        },
+        "http_private_key": {
+          "type": "string"
+        },
+        "http_public_key": {
           "type": "string"
         },
         "ips": {
@@ -271,18 +280,6 @@ func init() {
         },
         "ipv6": {
           "type": "string"
-        },
-        "private_key": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "public_key": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
@@ -477,17 +474,17 @@ func init() {
         }
       }
     },
-    "/dns/{id}": {
+    "/dns/{domain}": {
       "get": {
         "tags": [
           "show"
         ],
         "summary": "List one dns entry",
-        "operationId": "list_one__dns_entry",
+        "operationId": "list_one_dns_entry",
         "parameters": [
           {
             "type": "string",
-            "name": "id",
+            "name": "domain",
             "in": "path",
             "required": true
           }
@@ -531,10 +528,19 @@ func init() {
             "type": "string"
           }
         },
-        "dkim": {
+        "dkim_private_key": {
+          "type": "string"
+        },
+        "dkim_public_key": {
           "type": "string"
         },
         "domain": {
+          "type": "string"
+        },
+        "http_private_key": {
+          "type": "string"
+        },
+        "http_public_key": {
           "type": "string"
         },
         "ips": {
@@ -548,18 +554,6 @@ func init() {
         },
         "ipv6": {
           "type": "string"
-        },
-        "private_key": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "public_key": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },

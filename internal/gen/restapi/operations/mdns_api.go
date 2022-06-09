@@ -313,7 +313,7 @@ func (o *MdnsAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/dns/{id}"] = show.NewListOneDNSEntry(o.context, o.ShowListOneDNSEntryHandler)
+	o.handlers["GET"]["/dns/{domain}"] = show.NewListOneDNSEntry(o.context, o.ShowListOneDNSEntryHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

@@ -29,7 +29,7 @@ func NewListOneDNSEntry(ctx *middleware.Context, handler ListOneDNSEntryHandler)
 	return &ListOneDNSEntry{Context: ctx, Handler: handler}
 }
 
-/* ListOneDNSEntry swagger:route GET /dns/{id} show listOneDnsEntry
+/* ListOneDNSEntry swagger:route GET /dns/{domain} show listOneDnsEntry
 
 List one dns entry
 

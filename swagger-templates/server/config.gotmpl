@@ -6,10 +6,12 @@ import (
 
 // Configuration of app
 type Configuration struct {
+	HTTPHost    string   `required:"true" split_words:"true"`
 	HTTPPort    string   `required:"true" split_words:"true"`
 	DnsHost     string   `required:"true" split_words:"true"`
+	DnsTcpPort  string   `required:"true" split_words:"true"`
+	DnsUdpPort  string   `required:"true" split_words:"true"`
 	NameServers []string `required:"true" split_words:"true"`
-	IPV6        bool     `required:"true"`
 }
 
 func New() *Configuration {
@@ -23,3 +25,4 @@ func (cnf *Configuration) GetEnv() error {
 	}
 	return nil
 }
+
