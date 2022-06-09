@@ -40,8 +40,11 @@ func main() {
 	// start new map for domains record
 	dataMap := data.New()
 
+	// starting the application core
+	core := app.New(dataMap, cnf)
+
 	// new dns server
-	dnsServer := dns.New(cnf.NameServers, cnf.DnsHost, dataMap)
+	dnsServer := dns.New(dataMap, cnf)
 
 	// start dns server
 	if err := dnsServer.Run(); err != nil {
@@ -64,9 +67,6 @@ func main() {
 			}
 		}
 	}()
-
-	// starting the application core
-	core := app.New(dataMap, cnf)
 
 	var (
 		swaggerSpec *loads.Document
@@ -97,7 +97,7 @@ func main() {
 
 	server.GracefulTimeout = 3 * time.Second
 	server.Port = port
-	server.Host = "127.0.0.1"
+	server.Host = cnf.HTTPHost
 
 	if err = server.Serve(); err != nil {
 		log.Fatal("start server", err)

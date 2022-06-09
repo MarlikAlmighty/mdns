@@ -12,15 +12,17 @@
 
 ### Run
 ```sh
+$ export HTTP_HOST="127.0.0.1"
 $ export HTTP_PORT="8081"
-$ export NAME_SERVERS="1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
 $ export DNS_HOST="0.0.0.0"
-$ export IPV6="false"
+$ export DNS_TCP_PORT=":53"
+$ export DNS_UDP_PORT=":53"
+$ export NAME_SERVERS="1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
 ```
 
 ### Docker
 ```sh
-$ docker build -t mdns .
+$ docker build -t marlikalmighty/mdns .
 ```
 
 ### Documentation: 
@@ -29,6 +31,7 @@ $ swagger serve ./swagger-api/swagger.yml
 ```
 
 ### How to generate server:
+ Be careful, core methods will be overwritten.
 ```sh
 $ swagger generate server --spec ./swagger-api/swagger.yml \ 
 --target ./internal/gen -C ./swagger-templates/default-server.yml \

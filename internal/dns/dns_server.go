@@ -3,6 +3,7 @@ package dns
 import (
 	"context"
 	"fmt"
+	"github.com/MarlikAlmighty/mdns/internal/config"
 	"github.com/MarlikAlmighty/mdns/internal/data"
 	"github.com/miekg/dns"
 	"log"
@@ -13,16 +14,15 @@ import (
 
 // DNS wrapper over dns server
 type DNS struct {
-	TcpServer   *dns.Server
-	UdpServer   *dns.Server
-	Client      *dns.Client
-	Resolver    data.Resolver
-	NameServers []string
-	IPV4        string
+	TcpServer *dns.Server
+	UdpServer *dns.Server
+	Client    *dns.Client
+	Resolver  *data.ResolvedData
+	Config    *config.Configuration
 }
 
 // New simple constructor
-func New(nameServers []string, host string, d data.Resolver) *DNS {
+func New(d *data.ResolvedData, cnf *config.Configuration) *DNS {
 
 	t, u := &dns.Server{}, &dns.Server{}
 
@@ -31,12 +31,11 @@ func New(nameServers []string, host string, d data.Resolver) *DNS {
 	}
 
 	return &DNS{
-		TcpServer:   t,
-		UdpServer:   u,
-		Client:      c,
-		Resolver:    d,
-		IPV4:        host,
-		NameServers: nameServers,
+		TcpServer: t,
+		UdpServer: u,
+		Client:    c,
+		Resolver:  d,
+		Config:    cnf,
 	}
 }
 
@@ -47,10 +46,10 @@ func (s *DNS) Run() error {
 	tcpHandler.HandleFunc(".", s.Handler)
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", s.Handler)
-	s.TcpServer.Addr = s.IPV4 + ":53"
+	s.TcpServer.Addr = s.Config.DnsHost + s.Config.DnsTcpPort
 	s.TcpServer.Net = "tcp"
 	s.TcpServer.Handler = tcpHandler
-	s.UdpServer.Addr = s.IPV4 + ":53"
+	s.UdpServer.Addr = s.Config.DnsHost + s.Config.DnsUdpPort
 	s.UdpServer.Net = "udp"
 	s.UdpServer.Handler = udpHandler
 
@@ -119,7 +118,7 @@ func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*
 // Close stop dns server
 func (s *DNS) Close() error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	var errs []string
