@@ -161,45 +161,6 @@ func init() {
         }
       }
     },
-    "/dns/cert": {
-      "post": {
-        "consumes": [
-          "application/json; charset=utf-8"
-        ],
-        "produces": [
-          "application/json; charset=utf-8"
-        ],
-        "tags": [
-          "certs"
-        ],
-        "summary": "Fetch certs",
-        "operationId": "fetch_certs",
-        "parameters": [
-          {
-            "name": "certs",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dns_entry"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/dns_entry"
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/answer"
-            }
-          }
-        }
-      }
-    },
     "/dns/{domain}": {
       "get": {
         "tags": [
@@ -261,12 +222,6 @@ func init() {
           "type": "string"
         },
         "domain": {
-          "type": "string"
-        },
-        "http_private_key": {
-          "type": "string"
-        },
-        "http_public_key": {
           "type": "string"
         },
         "ips": {
@@ -435,45 +390,6 @@ func init() {
         }
       }
     },
-    "/dns/cert": {
-      "post": {
-        "consumes": [
-          "application/json; charset=utf-8"
-        ],
-        "produces": [
-          "application/json; charset=utf-8"
-        ],
-        "tags": [
-          "certs"
-        ],
-        "summary": "Fetch certs",
-        "operationId": "fetch_certs",
-        "parameters": [
-          {
-            "name": "certs",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/dns_entry"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/dns_entry"
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/answer"
-            }
-          }
-        }
-      }
-    },
     "/dns/{domain}": {
       "get": {
         "tags": [
@@ -535,12 +451,6 @@ func init() {
           "type": "string"
         },
         "domain": {
-          "type": "string"
-        },
-        "http_private_key": {
-          "type": "string"
-        },
-        "http_public_key": {
           "type": "string"
         },
         "ips": {

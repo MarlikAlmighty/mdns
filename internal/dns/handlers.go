@@ -14,7 +14,11 @@ import (
 // Handler serve dns requests
 func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 
-	defer w.Close()
+	defer func() {
+		if err := w.Close(); err != nil {
+			log.Printf("[ERR]: close ResponseWriter %v\n", err)
+		}
+	}()
 
 	msg := &dns.Msg{}
 	msg.SetReply(r)
@@ -88,7 +92,9 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 		}
 	}
 
-	w.WriteMsg(msg)
+	if err := w.WriteMsg(msg); err != nil {
+		log.Printf("[ERR]: write msg %v\n", err)
+	}
 }
 
 func (s *DNS) a(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {

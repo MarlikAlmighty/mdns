@@ -20,7 +20,6 @@ import (
 	"github.com/go-openapi/swag"
 
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
-	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/certs"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
@@ -54,9 +53,6 @@ func NewMdnsAPI(spec *loads.Document) *MdnsAPI {
 		}),
 		DeleteDeleteDNSEntryHandler: delete.DeleteDNSEntryHandlerFunc(func(params delete.DeleteDNSEntryParams) middleware.Responder {
 			return middleware.NotImplemented("operation delete.DeleteDNSEntry has not yet been implemented")
-		}),
-		CertsFetchCertsHandler: certs.FetchCertsHandlerFunc(func(params certs.FetchCertsParams) middleware.Responder {
-			return middleware.NotImplemented("operation certs.FetchCerts has not yet been implemented")
 		}),
 		ShowListOneDNSEntryHandler: show.ListOneDNSEntryHandlerFunc(func(params show.ListOneDNSEntryParams) middleware.Responder {
 			return middleware.NotImplemented("operation show.ListOneDNSEntry has not yet been implemented")
@@ -107,8 +103,6 @@ type MdnsAPI struct {
 	AddAddDNSEntryHandler add.AddDNSEntryHandler
 	// DeleteDeleteDNSEntryHandler sets the operation handler for the delete dns entry operation
 	DeleteDeleteDNSEntryHandler delete.DeleteDNSEntryHandler
-	// CertsFetchCertsHandler sets the operation handler for the fetch certs operation
-	CertsFetchCertsHandler certs.FetchCertsHandler
 	// ShowListOneDNSEntryHandler sets the operation handler for the list one dns entry operation
 	ShowListOneDNSEntryHandler show.ListOneDNSEntryHandler
 	// ListShowDNSRecordsHandler sets the operation handler for the show dns records operation
@@ -197,9 +191,6 @@ func (o *MdnsAPI) Validate() error {
 	}
 	if o.DeleteDeleteDNSEntryHandler == nil {
 		unregistered = append(unregistered, "delete.DeleteDNSEntryHandler")
-	}
-	if o.CertsFetchCertsHandler == nil {
-		unregistered = append(unregistered, "certs.FetchCertsHandler")
 	}
 	if o.ShowListOneDNSEntryHandler == nil {
 		unregistered = append(unregistered, "show.ListOneDNSEntryHandler")
@@ -306,10 +297,6 @@ func (o *MdnsAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/dns"] = delete.NewDeleteDNSEntry(o.context, o.DeleteDeleteDNSEntryHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/dns/cert"] = certs.NewFetchCerts(o.context, o.CertsFetchCertsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

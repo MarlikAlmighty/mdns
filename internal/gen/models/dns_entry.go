@@ -29,12 +29,6 @@ type DNSEntry struct {
 	// domain
 	Domain string `json:"domain,omitempty"`
 
-	// http private key
-	HTTPPrivateKey string `json:"http_private_key,omitempty"`
-
-	// http public key
-	HTTPPublicKey string `json:"http_public_key,omitempty"`
-
 	// ips
 	Ips []string `json:"ips"`
 
