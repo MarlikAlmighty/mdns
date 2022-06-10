@@ -23,7 +23,13 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 	msg := &dns.Msg{}
 	msg.SetReply(r)
 
-	log.Printf("[REQ]: %v %v\n", msg.Question[0].Name, dns.TypeToString[msg.Question[0].Qtype])
+	host, _, err := net.SplitHostPort(w.RemoteAddr().String())
+	if err != nil {
+		log.Printf("[ERR]: split addr on host and port %v\n", w.RemoteAddr().String())
+		return
+	}
+
+	log.Printf("[REQ]: from: %v %v %v\n", host, msg.Question[0].Name, dns.TypeToString[msg.Question[0].Qtype])
 
 	header := dns.RR_Header{
 		Name:   msg.Question[0].Name,
@@ -76,6 +82,13 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 	} else {
 
 		// if not found domain on server, doing look up request in internet
+
+		n := net.ParseIP(host)
+		if !n.IsPrivate() || !n.IsLoopback() {
+			// log.Printf("[ERR]: dns request from internet %v\n", host)
+			return
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
@@ -98,28 +111,41 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 }
 
 func (s *DNS) a(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {
+
 	msg.Answer = append(msg.Answer,
 		&dns.A{
 			Hdr: header,
 			A:   net.ParseIP(entry.IPV4),
 		})
-	if len(entry.Ips) > 0 {
-		for _, sock := range entry.Ips {
+
+	if len(entry.Ipv4s) > 0 {
+		for _, ipv4 := range entry.Ipv4s {
 			msg.Answer = append(msg.Answer,
 				&dns.A{
 					Hdr: header,
-					A:   net.ParseIP(sock),
+					A:   net.ParseIP(ipv4),
 				})
 		}
 	}
 }
 
 func (s *DNS) aaaa(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {
+
 	msg.Answer = append(msg.Answer,
 		&dns.AAAA{
 			Hdr:  header,
 			AAAA: net.ParseIP(entry.IPV6),
 		})
+
+	if len(entry.Ipv6s) > 0 {
+		for _, ipv6 := range entry.Ipv6s {
+			msg.Answer = append(msg.Answer,
+				&dns.AAAA{
+					Hdr:  header,
+					AAAA: net.ParseIP(ipv6),
+				})
+		}
+	}
 }
 
 func (s *DNS) caa(msg *dns.Msg, header dns.RR_Header) {
@@ -250,8 +276,10 @@ func (s *DNS) ns(msg *dns.Msg, entry *models.DNSEntry) {
 }
 
 func (s *DNS) ptr(msg *dns.Msg, entry *models.DNSEntry) {
+
 	ipAddress := net.ParseIP(entry.IPV4)
 	reverseIpAddress := s.reverseIP(ipAddress) + ".in-addr.arpa."
+
 	msg.Answer = append(msg.Answer,
 		&dns.PTR{
 			Hdr: dns.RR_Header{
@@ -262,6 +290,23 @@ func (s *DNS) ptr(msg *dns.Msg, entry *models.DNSEntry) {
 			},
 			Ptr: reverseIpAddress,
 		})
+
+	var ipv4 string
+	if len(entry.Ipv4s) > 0 {
+		for _, ip := range entry.Ipv4s {
+			ipv4 = s.reverseIP(net.ParseIP(ip)) + ".in-addr.arpa."
+			msg.Answer = append(msg.Answer,
+				&dns.PTR{
+					Hdr: dns.RR_Header{
+						Name:   entry.Domain,
+						Rrtype: dns.TypePTR,
+						Class:  dns.ClassINET,
+						Ttl:    86399,
+					},
+					Ptr: ipv4,
+				})
+		}
+	}
 }
 
 func (s *DNS) mx(msg *dns.Msg) {

@@ -131,7 +131,11 @@ definitions:
           type: string
       dkim_public_key:
           type: string
-      ips:
+      ipv4s:
+        type: array
+        items:
+          type: string
+      ipv6s:
         type: array
         items:
           type: string
