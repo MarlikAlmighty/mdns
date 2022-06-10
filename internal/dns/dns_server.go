@@ -46,10 +46,10 @@ func (s *DNS) Run() error {
 	tcpHandler.HandleFunc(".", s.Handler)
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", s.Handler)
-	s.TcpServer.Addr = s.Config.DnsHost + s.Config.DnsTcpPort
+	s.TcpServer.Addr = s.Config.DnsHost + ":" + s.Config.DnsTcpPort
 	s.TcpServer.Net = "tcp"
 	s.TcpServer.Handler = tcpHandler
-	s.UdpServer.Addr = s.Config.DnsHost + s.Config.DnsUdpPort
+	s.UdpServer.Addr = s.Config.DnsHost + ":" + s.Config.DnsUdpPort
 	s.UdpServer.Net = "udp"
 	s.UdpServer.Handler = udpHandler
 
@@ -91,7 +91,7 @@ func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*
 
 		go func(v string, answer chan *dns.Msg) {
 
-			r, _, err = s.Client.Exchange(req, v)
+			r, _, err = s.Client.Exchange(req, v+":53")
 			if err != nil {
 				return
 			}
@@ -118,7 +118,7 @@ func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*
 // Close stop dns server
 func (s *DNS) Close() error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	var errs []string
