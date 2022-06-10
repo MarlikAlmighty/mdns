@@ -18,6 +18,7 @@ func (core *Core) UpdateDNSEntryHandler(params apiUpdate.UpdateDNSEntryParams) m
 
 	m.Domain = params.Update.Domain
 	m.IPV4 = params.Update.IPV4
+	m.Acme = params.Update.Acme
 	m.Ips = params.Update.Ips
 	core.Resolver.Set(m.Domain, m)
 	return apiUpdate.NewUpdateDNSEntryOK().WithPayload(m)
