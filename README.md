@@ -2,11 +2,7 @@
 
 [![CI](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml) &nbsp;
 [![Release to Docker Hub](https://github.com/MarlikAlmighty/mdns/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/MarlikAlmighty/mdns/actions/workflows/cd.yml) &nbsp;
-[![License](https://img.shields.io/badge/License-MIT%201.0-orange.svg)](https://github.com/MarlikAlmighty/mdns/blob/master/LICENSE) &nbsp; 
-
-### This is a custom dns server that can be controlled by rest api. 
-
-***
+[![License](https://img.shields.io/badge/License-MIT%201.0-orange.svg)](https://github.com/MarlikAlmighty/mdns/blob/master/LICENSE) &nbsp;
 
 ### Run
 ```sh
@@ -19,7 +15,7 @@ $ export NAME_SERVERS="1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
 $ go run ./cmd/...
 ```
 
-### Query pimps
+### Request examples
 
 ```sh
 # Add domain
