@@ -6,9 +6,9 @@ After=network.target
 Environment="HTTP_HOST=127.0.0.1"
 Environment="HTTP_PORT=8081"
 Environment="DNS_HOST=0.0.0.0"
-Environment="DNS_TCP_PORT=:53"
-Environment="DNS_UDP_PORT=:53"
-Environment="NAME_SERVERS=1.1.1.1:53,1.0.0.1:53,8.8.8.8:53,8.8.4.4:53"
+Environment="DNS_TCP_PORT=53"
+Environment="DNS_UDP_PORT=53"
+Environment="NAME_SERVERS=1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
 Type=simple
 PIDFile=/run/mdns.pid
 WorkingDirectory=/home/user/mdns
