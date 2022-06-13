@@ -1,7 +1,5 @@
 # mDNS
 
-### A custom dns server.
-
 ***
 
 [![CI](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml) &nbsp;
@@ -10,14 +8,46 @@
 
 ***
 
+### This is a custom dns server that can be controlled by rest api. 
+
+***
+
 ### Run
 ```sh
 $ export HTTP_HOST="127.0.0.1"
 $ export HTTP_PORT="8081"
 $ export DNS_HOST="0.0.0.0"
-$ export DNS_TCP_PORT="53"
-$ export DNS_UDP_PORT="53"
+$ export DNS_TCP_PORT="5353"
+$ export DNS_UDP_PORT="5353"
 $ export NAME_SERVERS="1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
+$ go run ./cmd/...
+```
+
+### Query pimps
+
+```sh
+# Add domain
+curl -X POST http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \
+    -d '{"domain":"example.com.","ipv4":"127.0.0.1"}'
+
+# List all domains
+curl http://127.0.0.1:8081/dns
+
+# List one domain
+curl http://127.0.0.1:8081/dns/example.com.
+
+# Update domain
+curl -X PUT http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \ 
+    -d '{"domain":"example.com.","ipv4":"127.0.0.1","ips":["127.0.0.2", "127.0.0.3"]}'
+
+# Delete domain
+curl -X DELETE http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \ 
+    -d '{"domain":"example.com.","ipv4":"127.0.0.1"}'
+```
+
+### Build
+```sh
+$ make all && ls -l ./bin
 ```
 
 ### Docker
@@ -25,7 +55,7 @@ $ export NAME_SERVERS="1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
 $ docker build -t marlikalmighty/mdns .
 ```
 
-### Documentation: 
+### API Documentation
 ```sh
 $ swagger serve ./swagger-api/swagger.yml
 ```
