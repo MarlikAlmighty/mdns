@@ -18,17 +18,18 @@ func (core *Core) UpdateDNSEntryHandler(params apiUpdate.UpdateDNSEntryParams) m
 	}
 
 	m.Domain = params.Update.Domain
-	m.IPV4 = params.Update.IPV4
+	m.Ipv4s = params.Update.Ipv4s
 	m.Acme = params.Update.Acme
-	m.Ipv4s = append(m.Ipv4s, params.Update.Ipv4s...)
 
 	var (
 		ipv6 string
 		err  error
 	)
 
-	for _, ip := range params.Update.Ipv4s {
-		ipv6, err = core.IPV4ToIPV6(ip)
+	m.Ipv6s = []string{}
+
+	for _, v := range params.Update.Ipv4s {
+		ipv6, err = core.IPV4ToIPV6(v)
 		if err != nil {
 			return apiAdd.NewAddDNSEntryBadRequest().WithPayload(&models.Answer{
 				Code:    400,

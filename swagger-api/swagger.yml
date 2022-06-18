@@ -123,10 +123,6 @@ definitions:
     properties:
       domain:
         type: string
-      ipv4:
-        type: string
-      ipv6:
-        type: string
       dkim_private_key:
           type: string
       dkim_public_key:

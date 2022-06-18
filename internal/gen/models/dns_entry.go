@@ -29,14 +29,8 @@ type DNSEntry struct {
 	// domain
 	Domain string `json:"domain,omitempty"`
 
-	// ipv4
-	IPV4 string `json:"ipv4,omitempty"`
-
 	// ipv4s
 	Ipv4s []string `json:"ipv4s"`
-
-	// ipv6
-	IPV6 string `json:"ipv6,omitempty"`
 
 	// ipv6s
 	Ipv6s []string `json:"ipv6s"`

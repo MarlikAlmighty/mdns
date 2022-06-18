@@ -1,122 +1,15 @@
 package dns
 
 import (
-	"context"
 	"fmt"
 	"github.com/MarlikAlmighty/mdns/internal/gen/models"
 	"github.com/miekg/dns"
 	"log"
 	"net"
 	"strings"
-	"time"
 )
 
-// Handler serve dns requests
-func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
-
-	defer func() {
-		if err := w.Close(); err != nil {
-			log.Printf("[ERR]: close ResponseWriter %v\n", err)
-		}
-	}()
-
-	msg := &dns.Msg{}
-	msg.SetReply(r)
-
-	host, _, err := net.SplitHostPort(w.RemoteAddr().String())
-	if err != nil {
-		log.Printf("[ERR]: split addr on host and port %v\n", w.RemoteAddr().String())
-		return
-	}
-
-	log.Printf("[REQ]: from: %v %v %v\n", host, msg.Question[0].Name, dns.TypeToString[msg.Question[0].Qtype])
-
-	header := dns.RR_Header{
-		Name:   msg.Question[0].Name,
-		Rrtype: msg.Question[0].Qtype,
-		Class:  dns.ClassINET,
-		Ttl:    60,
-	}
-
-	// to lower case
-	domain := strings.ToLower(msg.Question[0].Name)
-
-	// find domain in map
-	entry := s.Resolver.Get(domain)
-
-	// find sub domain in map
-	if entry.Domain == "" {
-		mp := s.Resolver.GetMap()
-		for k, v := range mp {
-			if ok := dns.IsSubDomain(k, domain); ok {
-				domain = k
-				entry = &v
-				break
-			}
-		}
-	}
-
-	// if domain or sub domain find
-	if entry.Domain != "" {
-		switch r.Question[0].Qtype {
-		case dns.TypeA:
-			s.a(msg, entry, header)
-		case dns.TypeAAAA:
-			s.aaaa(msg, entry, header)
-		case dns.TypeCAA:
-			s.caa(msg, header)
-		case dns.TypeTXT:
-			s.txt(msg, entry)
-		case dns.TypeSOA:
-			s.soa(msg, entry)
-		case dns.TypeNS:
-			s.ns(msg, entry)
-		case dns.TypePTR:
-			s.ptr(msg, entry)
-		case dns.TypeMX:
-			s.mx(msg)
-		default:
-			s.soa(msg, entry)
-		}
-
-	} else {
-
-		// if not found domain on server, doing look up request in internet
-
-		n := net.ParseIP(host)
-		if !n.IsPrivate() || !n.IsLoopback() {
-			// log.Printf("[ERR]: dns request from internet %v\n", host)
-			return
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		var err error
-		if msg, err = s.Lookup(ctx, r, s.Config.NameServers); err != nil {
-			log.Printf("[LOOKUP ERROR]: %v\n", err)
-			msg.SetRcodeFormatError(r)
-		}
-	}
-
-	if len(msg.Answer) > 0 {
-		for _, answer := range msg.Answer {
-			log.Printf("[RESP]: %v\n", answer.String())
-		}
-	}
-
-	if err := w.WriteMsg(msg); err != nil {
-		log.Printf("[ERR]: write msg %v\n", err)
-	}
-}
-
 func (s *DNS) a(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {
-
-	msg.Answer = append(msg.Answer,
-		&dns.A{
-			Hdr: header,
-			A:   net.ParseIP(entry.IPV4),
-		})
 
 	if len(entry.Ipv4s) > 0 {
 		for _, ipv4 := range entry.Ipv4s {
@@ -130,12 +23,6 @@ func (s *DNS) a(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {
 }
 
 func (s *DNS) aaaa(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {
-
-	msg.Answer = append(msg.Answer,
-		&dns.AAAA{
-			Hdr:  header,
-			AAAA: net.ParseIP(entry.IPV6),
-		})
 
 	if len(entry.Ipv6s) > 0 {
 		for _, ipv6 := range entry.Ipv6s {
@@ -220,7 +107,14 @@ func (s *DNS) txt(msg *dns.Msg, entry *models.DNSEntry) {
 			})
 
 	default:
-		spf := []string{"v=spf1 include:_spf." + outDot + " a mx ptr ~all"}
+
+		var (
+			ipv4 string
+			spf  []string
+		)
+
+		ipv4 = strings.Join(entry.Ipv4s, ",")
+		spf = append(spf, fmt.Sprintf("v=spf1 ip4:%v include:_spf.%v a mx ~all", ipv4, outDot))
 		msg.Answer = append(msg.Answer,
 			&dns.TXT{
 				Hdr: dns.RR_Header{
@@ -273,40 +167,6 @@ func (s *DNS) ns(msg *dns.Msg, entry *models.DNSEntry) {
 			},
 			Ns: "ns2." + entry.Domain,
 		})
-}
-
-func (s *DNS) ptr(msg *dns.Msg, entry *models.DNSEntry) {
-
-	ipAddress := net.ParseIP(entry.IPV4)
-	reverseIpAddress := s.reverseIP(ipAddress) + ".in-addr.arpa."
-
-	msg.Answer = append(msg.Answer,
-		&dns.PTR{
-			Hdr: dns.RR_Header{
-				Name:   entry.Domain,
-				Rrtype: dns.TypePTR,
-				Class:  dns.ClassINET,
-				Ttl:    86399,
-			},
-			Ptr: reverseIpAddress,
-		})
-
-	var ipv4 string
-	if len(entry.Ipv4s) > 0 {
-		for _, ip := range entry.Ipv4s {
-			ipv4 = s.reverseIP(net.ParseIP(ip)) + ".in-addr.arpa."
-			msg.Answer = append(msg.Answer,
-				&dns.PTR{
-					Hdr: dns.RR_Header{
-						Name:   entry.Domain,
-						Rrtype: dns.TypePTR,
-						Class:  dns.ClassINET,
-						Ttl:    86399,
-					},
-					Ptr: ipv4,
-				})
-		}
-	}
 }
 
 func (s *DNS) mx(msg *dns.Msg) {

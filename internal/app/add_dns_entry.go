@@ -11,15 +11,22 @@ func (core *Core) AddDNSEntryHandler(params apiAdd.AddDNSEntryParams) middleware
 
 	md := core.Resolver.Get(params.Add.Domain)
 
-	ipv6, err := core.IPV4ToIPV6(params.Add.IPV4)
-	if err != nil {
-		return apiAdd.NewAddDNSEntryBadRequest().WithPayload(&models.Answer{
-			Code:    400,
-			Message: "can't convert ipv4 to ipv6",
-		})
-	}
+	var (
+		ipv6 string
+		err  error
+	)
 
-	md.IPV6 = ipv6
+	md.Ipv6s = []string{}
+	for _, v := range params.Add.Ipv4s {
+		ipv6, err = core.IPV4ToIPV6(v)
+		if err != nil {
+			return apiAdd.NewAddDNSEntryBadRequest().WithPayload(&models.Answer{
+				Code:    400,
+				Message: "can't convert ipv4 to ipv6",
+			})
+		}
+		md.Ipv6s = append(md.Ipv6s, ipv6)
+	}
 
 	var (
 		privRSA *rsa.PrivateKey
@@ -41,9 +48,9 @@ func (core *Core) AddDNSEntryHandler(params apiAdd.AddDNSEntryParams) middleware
 		})
 	}
 
-	if md.Domain == "" || md.IPV4 == "" {
+	if md.Domain == "" || len(md.Ipv4s) == 0 {
 		md.Domain = params.Add.Domain
-		md.IPV4 = params.Add.IPV4
+		md.Ipv4s = params.Add.Ipv4s
 	}
 
 	md.DkimPrivateKey = core.ExportRsaPrivateKeyAsStr(privRSA)
