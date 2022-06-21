@@ -119,8 +119,10 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 			s.soa(msg, entry)
 		case dns.TypeNS:
 			s.ns(msg, entry)
+		case dns.TypePTR:
+			s.ptr(msg, entry)
 		case dns.TypeMX:
-			s.mx(msg)
+			s.mx(msg, entry)
 		default:
 			s.soa(msg, entry)
 		}

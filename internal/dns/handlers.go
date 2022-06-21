@@ -2,11 +2,13 @@ package dns
 
 import (
 	"fmt"
-	"github.com/MarlikAlmighty/mdns/internal/gen/models"
-	"github.com/miekg/dns"
 	"log"
 	"net"
 	"strings"
+	"time"
+
+	"github.com/MarlikAlmighty/mdns/internal/gen/models"
+	"github.com/miekg/dns"
 )
 
 func (s *DNS) a(msg *dns.Msg, entry *models.DNSEntry, header dns.RR_Header) {
@@ -56,7 +58,7 @@ func (s *DNS) txt(msg *dns.Msg, entry *models.DNSEntry) {
 
 	case "mail":
 
-		cert := fmt.Sprintf("v=DKIM1; k=rsa; t=s; p=%s", entry.DkimPublicKey)
+		cert := fmt.Sprintf("v=DKIM1; k=rsa; p=%s", entry.DkimPublicKey)
 		if len(cert) > dns.MinMsgSize {
 			log.Printf("[ERR]: cert is %v over then dns.MinMsgSize \n", len(cert))
 			return
@@ -91,7 +93,7 @@ func (s *DNS) txt(msg *dns.Msg, entry *models.DNSEntry) {
 					Class:  dns.ClassINET,
 					Ttl:    60,
 				},
-				Txt: []string{"DMARC1; p=reject; sp=reject; adkim=s; aspf=s; rua=mailto:admin@" + outDotEntry},
+				Txt: []string{"v=DMARC1; p=none; sp=none; rua=mailto:admin@" + outDotEntry},
 			})
 
 	case "_acme-challenge":
@@ -113,8 +115,8 @@ func (s *DNS) txt(msg *dns.Msg, entry *models.DNSEntry) {
 			spf  []string
 		)
 
-		ipv4 = strings.Join(entry.Ipv4s, ",")
-		spf = append(spf, fmt.Sprintf("v=spf1 ip4:%v include:_spf.%v a mx ~all", ipv4, outDot))
+		ipv4 = strings.Join(entry.Ipv4s, " ip4:")
+		spf = append(spf, fmt.Sprintf("v=spf1 ip4:%v include:_spf.%v a mx all", ipv4, outDot))
 		msg.Answer = append(msg.Answer,
 			&dns.TXT{
 				Hdr: dns.RR_Header{
@@ -139,7 +141,7 @@ func (s *DNS) soa(msg *dns.Msg, entry *models.DNSEntry) {
 			},
 			Ns:      "ns1." + entry.Domain,
 			Mbox:    "admin." + entry.Domain,
-			Serial:  2279726185,
+			Serial:  uint32(time.Now().Unix()),
 			Refresh: 900,
 			Retry:   900,
 			Expire:  1800,
@@ -154,7 +156,7 @@ func (s *DNS) ns(msg *dns.Msg, entry *models.DNSEntry) {
 				Name:   entry.Domain,
 				Rrtype: dns.TypeNS,
 				Class:  dns.ClassINET,
-				Ttl:    86400,
+				Ttl:    600,
 			},
 			Ns: "ns1." + entry.Domain,
 		},
@@ -163,22 +165,39 @@ func (s *DNS) ns(msg *dns.Msg, entry *models.DNSEntry) {
 				Name:   entry.Domain,
 				Rrtype: dns.TypeNS,
 				Class:  dns.ClassINET,
-				Ttl:    86400,
+				Ttl:    600,
 			},
 			Ns: "ns2." + entry.Domain,
 		})
 }
 
-func (s *DNS) mx(msg *dns.Msg) {
+func (s *DNS) ptr(msg *dns.Msg, entry *models.DNSEntry) {
+	var reverseIpAddress string
+	for _, v := range entry.Ipv4s {
+		reverseIpAddress = s.reverseIP(net.ParseIP(v)) + ".in-addr.arpa."
+		msg.Answer = append(msg.Answer,
+			&dns.PTR{
+				Hdr: dns.RR_Header{
+					Name:   reverseIpAddress,
+					Rrtype: dns.TypePTR,
+					Class:  dns.ClassINET,
+					Ttl:    600,
+				},
+				Ptr: entry.Domain,
+			})
+	}
+}
+
+func (s *DNS) mx(msg *dns.Msg, entry *models.DNSEntry) {
 	msg.Answer = append(msg.Answer,
 		&dns.MX{
 			Hdr: dns.RR_Header{
-				Name:   msg.Question[0].Name,
+				Name:   entry.Domain,
 				Rrtype: dns.TypeMX,
 				Class:  dns.ClassINET,
-				Ttl:    86399,
+				Ttl:    600,
 			},
 			Preference: 10,
-			Mx:         "mail." + msg.Question[0].Name,
+			Mx:         "mail." + entry.Domain,
 		})
 }
