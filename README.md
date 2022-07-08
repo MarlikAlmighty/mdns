@@ -1,6 +1,6 @@
 # mDNS
 
-[![CI](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml) &nbsp;
+[![CI](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml/badge.svg)](https://github.com/MarlikAlmighty/mdns/actions/workflows/ci.yml) &nbsp;
 [![Release to Docker Hub](https://github.com/MarlikAlmighty/mdns/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/MarlikAlmighty/mdns/actions/workflows/cd.yml) &nbsp;
 [![License](https://img.shields.io/badge/License-MIT%201.0-orange.svg)](https://github.com/MarlikAlmighty/mdns/blob/master/LICENSE) &nbsp;
 
