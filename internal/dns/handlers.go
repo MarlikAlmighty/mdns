@@ -173,19 +173,17 @@ func (s *DNS) ns(msg *dns.Msg, entry *models.DNSEntry) {
 
 func (s *DNS) ptr(msg *dns.Msg, entry *models.DNSEntry) {
 	var reverseIpAddress string
-	for _, v := range entry.Ipv4s {
-		reverseIpAddress = s.reverseIP(net.ParseIP(v)) + ".in-addr.arpa."
-		msg.Answer = append(msg.Answer,
-			&dns.PTR{
-				Hdr: dns.RR_Header{
-					Name:   reverseIpAddress,
-					Rrtype: dns.TypePTR,
-					Class:  dns.ClassINET,
-					Ttl:    600,
-				},
-				Ptr: entry.Domain,
-			})
-	}
+	reverseIpAddress = s.reverseIP(net.ParseIP(entry.Ipv4s[0])) + ".in-addr.arpa."
+	msg.Answer = append(msg.Answer,
+		&dns.PTR{
+			Hdr: dns.RR_Header{
+				Name:   reverseIpAddress,
+				Rrtype: dns.TypePTR,
+				Class:  dns.ClassINET,
+				Ttl:    600,
+			},
+			Ptr: entry.Domain,
+		})
 }
 
 func (s *DNS) mx(msg *dns.Msg, entry *models.DNSEntry) {
