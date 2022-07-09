@@ -22,7 +22,7 @@ jobs:
       run: |
         Docker Login -u $DOCKER_USER -p $DOCKER_PASSWORD
         - name: Build the Docker image 
-          docker build . --file Dockerfile --tag my-image-name:marlikalmighty/mdns:$(date +%s)
+          docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
         - name: Docker Push
         run: docker push ${{secrets.DOCKER_USER}}/mdns
           
