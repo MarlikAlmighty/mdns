@@ -21,7 +21,6 @@ jobs:
       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: | 
         login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    
         - uses: actions/checkout@v2
         - name: build
           run: docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
