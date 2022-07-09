@@ -29,7 +29,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/mdns:latest
+          tags: ${{ secrets.DOCKER_USER }}/mdns:latest
 
           
 
