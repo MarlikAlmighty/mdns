@@ -15,16 +15,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: docker login
+    - name: login
     env:
       DOCKER_USER: ${{secrets.DOCKER_USER}}
       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: | 
-      docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    - name: Build the Docker image 
-          docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
-    - name: Docker Push
-      run: docker push ${{secrets.DOCKER_USER}}/mdns
+        login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+        - name: build
+        run: docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
+        - name: push
+        run: docker push ${{secrets.DOCKER_USER}}/mdns
           
 
 
