@@ -14,19 +14,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
     - name: login
+    - uses: actions/checkout@v1
+    
     env:
       DOCKER_USER: ${{secrets.DOCKER_USER}}
       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: | 
         login -u $DOCKER_USER -p $DOCKER_PASSWORD
-        - uses: actions/checkout@v2
+    
         - name: build
-          run: docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v2
+        run: docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
+        
         - name: push
-          run: docker push ${{secrets.DOCKER_USER}}/mdns
+        - uses: actions/checkout@v3
+        run: docker push ${{secrets.DOCKER_USER}}/mdns
           
 
 
