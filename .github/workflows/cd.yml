@@ -5,6 +5,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
 
 jobs:
 
@@ -13,17 +14,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v1
     - name: login
     env:
       DOCKER_USER: ${{secrets.DOCKER_USER}}
       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: | 
-        login -u $DOCKER_USER -p $DOCKER_PASSWORD 
-        - name: build
-        run: docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
-        - name: push
-        run: docker push ${{secrets.DOCKER_USER}}/mdns
+        login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - uses: actions/checkout@v2
+    - name: build
+      run: docker build . --file Dockerfile --tag marlikalmighty/mdns:$(date +%s)
+    - uses: actions/checkout@v3
+    - name: push
+      run: docker push ${{secrets.DOCKER_USER}}/mdns
           
 
 
