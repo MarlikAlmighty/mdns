@@ -4,13 +4,12 @@
 [![Release to Docker Hub](https://github.com/MarlikAlmighty/mdns/actions/workflows/cd.yml/badge.svg?branch=master)](https://github.com/MarlikAlmighty/mdns/actions/workflows/cd.yml) &nbsp;
 [![License](https://img.shields.io/badge/License-MIT%201.0-orange.svg)](https://github.com/MarlikAlmighty/mdns/blob/master/LICENSE) &nbsp;
 
-# mdns
 
-mdns is a lightweight application capable of processing DNS queries and managing DNS zones through a REST API. It is designed to provide fast and efficient operation, as well as ease of use.
+mDNS is a lightweight application capable of processing DNS queries and managing DNS zones through a REST API. It is designed to provide fast and efficient operation, as well as ease of use.
 
 With the REST API, you can add, modify, and delete DNS zones, records, and server settings. All operations are performed through HTTP requests, making DNS server management convenient and flexible.
 
-mdns supports various types of DNS records, such as A, CNAME, MX, TXT, and others. You can easily add and modify these records through the REST API to configure your DNS infrastructure according to your needs.
+mDNS supports various types of DNS records, such as A, CNAME, MX, TXT, and others. You can easily add and modify these records through the REST API to configure your DNS infrastructure according to your needs.
 
 
 ### Disable systemd-resolve on Ubuntu
