@@ -14,6 +14,7 @@ Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
 
 export GO111MODULE=on
+export CGO_ENABLED=0
 
 .PHONY: all
 all: $(BIN) ; $(info $(M) building executable…) @ ## Build program binary

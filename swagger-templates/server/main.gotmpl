@@ -17,18 +17,18 @@ import (
         {{end}}
     {{end}}
 
+	"github.com/go-openapi/loads"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
-	"github.com/go-openapi/loads"
 )
 
 func main() {
 
-// get the configuration for the application through ENV
+    // get the configuration for the application through ENV
 	cnf := config.New()
 	if err := cnf.GetEnv(); err != nil {
 		log.Fatalf("get environment keys: %v\n", err)
@@ -87,14 +87,14 @@ func main() {
 
 	var port int
 	if port, err = strconv.Atoi(cnf.HTTPPort); err != nil {
-		log.Fatal("can't convert port from string", err)
+		log.Fatalf("%v\n", err)
 	}
 
 	server.GracefulTimeout = 3 * time.Second
 	server.Port = port
-	server.Host = cnf.HTTPHost
+	server.Host = "127.0.0.1"
 
 	if err = server.Serve(); err != nil {
-		log.Fatal("start server", err)
+		log.Fatalf("start rest api server %v\n", err)
 	}
 }

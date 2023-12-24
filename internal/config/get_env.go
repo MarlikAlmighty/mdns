@@ -6,9 +6,7 @@ import (
 
 // Configuration of app
 type Configuration struct {
-	HTTPHost    string   `required:"true" split_words:"true"`
 	HTTPPort    string   `required:"true" split_words:"true"`
-	DnsHost     string   `required:"true" split_words:"true"`
 	DnsTcpPort  string   `required:"true" split_words:"true"`
 	DnsUdpPort  string   `required:"true" split_words:"true"`
 	NameServers []string `required:"true" split_words:"true"`

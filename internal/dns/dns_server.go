@@ -37,52 +37,64 @@ func New(d *data.ResolvedData, cnf *config.Configuration) *DNS {
 }
 
 // Run start dns server
-func (s *DNS) Run() error {
+func (s *DNS) Run() {
+
 	tcpHandler := dns.NewServeMux()
 	tcpHandler.HandleFunc(".", s.Handler)
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", s.Handler)
-	s.TcpServer.Addr = s.Config.DnsHost + ":" + s.Config.DnsTcpPort
-	s.TcpServer.Net = "tcp"
+
+	s.TcpServer.Addr = "0.0.0.0" + ":" + s.Config.DnsTcpPort
+	s.TcpServer.Net = "tcp4"
 	s.TcpServer.Handler = tcpHandler
-	s.UdpServer.Addr = s.Config.DnsHost + ":" + s.Config.DnsUdpPort
-	s.UdpServer.Net = "udp"
+
+	s.UdpServer.Addr = "0.0.0.0" + ":" + s.Config.DnsUdpPort
+	s.UdpServer.Net = "udp4"
 	s.UdpServer.Handler = udpHandler
-	var errs []string
-	log.Printf("Serving mdns on tcp %v \n", s.TcpServer.Addr)
+
 	go func() {
+		log.Printf("Serving mdns on tcp %v \n", s.TcpServer.Addr)
 		if err := s.TcpServer.ListenAndServe(); err != nil {
-			errs = append(errs, err.Error())
+			log.Fatal(err)
 		}
 	}()
-	log.Printf("Serving mdns on udp %v \n", s.UdpServer.Addr)
+
 	go func() {
+		log.Printf("Serving mdns on udp %v \n", s.UdpServer.Addr)
 		if err := s.UdpServer.ListenAndServe(); err != nil {
-			errs = append(errs, err.Error())
+			log.Fatal(err)
 		}
 	}()
-	if len(errs) > 0 {
-		return fmt.Errorf("errs: %s", strings.Join(errs, ","))
-	}
-	return nil
 }
 
 // Handler serve dns requests
 func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
+
 	defer func() {
 		if err := w.Close(); err != nil {
-			log.Printf("[ERR]: close ResponseWriter %v\n", err)
+			log.Printf("%v\n", err)
 		}
 	}()
+
 	msg := &dns.Msg{}
 	msg.SetReply(r)
+
+	// for logging ***************************
+
 	host, _, err := net.SplitHostPort(w.RemoteAddr().String())
 	if err != nil {
-		log.Printf("[ERR]: split addr on host and port %v\n", w.RemoteAddr().String())
+		log.Printf("%v\n", w.RemoteAddr().String())
 		return
 	}
-	log.Printf("[REQ]: from: %v %v %v\n", host, msg.Question[0].Name,
+
+	// Logging request
+	log.Printf("[REQ]: from: %v %v %v\n",
+		host,
+		msg.Question[0].Name,
 		dns.TypeToString[msg.Question[0].Qtype])
+
+	// *******************************************
+
 	header := dns.RR_Header{
 		Name:   msg.Question[0].Name,
 		Rrtype: msg.Question[0].Qtype,
@@ -126,51 +138,55 @@ func (s *DNS) Handler(w dns.ResponseWriter, r *dns.Msg) {
 		default:
 			s.soa(msg, entry)
 		}
+
 	} else {
-		// if not found domain on server, doing look up request in internet
+
+		/*
+			if not found domain on server, doing look up request in internet,
+			but before check if request is not from local net
+		*/
 		n := net.ParseIP(host)
-		if !n.IsPrivate() || !n.IsLoopback() {
-			// log.Printf("[ERR]: dns request from internet %v\n", host)
+		if n.IsPrivate() || n.IsLoopback() {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if msg, err = s.Lookup(ctx, r, s.Config.NameServers); err != nil {
+				log.Printf("[ERR]: %v\n", err)
+				return
+			}
+		} else {
+			log.Printf("[ERR]: deny request from %v\n",
+				n.String())
 			return
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if msg, err = s.Lookup(ctx, r, s.Config.NameServers); err != nil {
-			log.Printf("[LOOKUP ERROR]: %v\n", err)
-			msg.SetRcodeFormatError(r)
-		}
 	}
-	if len(msg.Answer) > 0 {
-		for _, answer := range msg.Answer {
-			log.Printf("[RESP]: %v\n", answer.String())
-		}
-	}
+
 	if err = w.WriteMsg(msg); err != nil {
 		log.Printf("[ERR]: write msg %v\n", err)
 	}
 }
 
 func (s *DNS) Lookup(ctx context.Context, req *dns.Msg, nameServers []string) (*dns.Msg, error) {
+
 	var (
 		r   *dns.Msg
 		err error
 	)
+
 	answer := make(chan *dns.Msg, 1)
+
 	for _, v := range nameServers {
 		go func(v string, answer chan *dns.Msg) {
 			r, _, err = s.Client.Exchange(req, v+":53")
 			if err != nil {
+				log.Printf("[ERR]: client exchange, host: %v err: %v\n", v, err)
 				return
 			}
-			if r != nil && r.Rcode == dns.RcodeServerFailure {
-				answer <- r.SetRcodeFormatError(r)
-				return
-			}
-			if r.Rcode == dns.RcodeSuccess {
+			if r != nil {
 				answer <- r
 			}
 		}(v, answer)
 	}
+
 	select {
 	case a := <-answer:
 		return a, nil

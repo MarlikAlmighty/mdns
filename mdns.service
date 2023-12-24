@@ -3,22 +3,20 @@ Description=Mdns
 After=network.target
 
 [Service]
-Environment="HTTP_HOST=127.0.0.1"
 Environment="HTTP_PORT=8081"
-Environment="DNS_HOST=0.0.0.0"
-Environment="DNS_TCP_PORT=53"
-Environment="DNS_UDP_PORT=53"
+Environment="DNS_TCP_PORT=1053"
+Environment="DNS_UDP_PORT=1053"
 Environment="NAME_SERVERS=1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
 Type=simple
 PIDFile=/run/mdns.pid
-WorkingDirectory=/home/user/mdns
-ExecStart=/home/user/mdns/bin/mdns
+WorkingDirectory=/home/marlik/go/src/mdns
+ExecStart=/home/marlik/go/src/mdns/bin/mdns
 ExecStop=/bin/kill -INT $MAINPID
 User=root
 Group=root
 StandardOutput=append:/var/log/mdns.log
 StandardError=append:/var/log/mdns.log
-Restart=always
+#Restart=always
 
 [Install]
 WantedBy=multi-user.target

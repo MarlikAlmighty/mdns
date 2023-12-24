@@ -498,7 +498,6 @@ func handleInterrupt(once *sync.Once, s *Server) {
 				continue
 			}
 			s.interrupted = true
-			s.Logf("Shutting down... ")
 			if err := s.Shutdown(); err != nil {
 				s.Logf("HTTP server Shutdown: %v", err)
 			}

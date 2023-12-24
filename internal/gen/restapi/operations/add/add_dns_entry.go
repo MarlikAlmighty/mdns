@@ -29,10 +29,10 @@ func NewAddDNSEntry(ctx *middleware.Context, handler AddDNSEntryHandler) *AddDNS
 	return &AddDNSEntry{Context: ctx, Handler: handler}
 }
 
-/* AddDNSEntry swagger:route POST /dns add addDnsEntry
+/*
+	AddDNSEntry swagger:route POST /dns add addDnsEntry
 
 Add dns entry
-
 */
 type AddDNSEntry struct {
 	Context *middleware.Context

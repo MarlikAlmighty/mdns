@@ -16,7 +16,8 @@ import (
 // ListOneDNSEntryOKCode is the HTTP code returned for type ListOneDNSEntryOK
 const ListOneDNSEntryOKCode int = 200
 
-/*ListOneDNSEntryOK OK
+/*
+ListOneDNSEntryOK OK
 
 swagger:response listOneDnsEntryOK
 */
@@ -60,7 +61,8 @@ func (o *ListOneDNSEntryOK) WriteResponse(rw http.ResponseWriter, producer runti
 // ListOneDNSEntryBadRequestCode is the HTTP code returned for type ListOneDNSEntryBadRequest
 const ListOneDNSEntryBadRequestCode int = 400
 
-/*ListOneDNSEntryBadRequest Bad request
+/*
+ListOneDNSEntryBadRequest Bad request
 
 swagger:response listOneDnsEntryBadRequest
 */

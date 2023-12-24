@@ -29,10 +29,10 @@ func NewUpdateDNSEntry(ctx *middleware.Context, handler UpdateDNSEntryHandler) *
 	return &UpdateDNSEntry{Context: ctx, Handler: handler}
 }
 
-/* UpdateDNSEntry swagger:route PUT /dns update updateDnsEntry
+/*
+	UpdateDNSEntry swagger:route PUT /dns update updateDnsEntry
 
 Update dns entry
-
 */
 type UpdateDNSEntry struct {
 	Context *middleware.Context

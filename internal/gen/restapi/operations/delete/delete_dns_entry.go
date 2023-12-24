@@ -29,10 +29,10 @@ func NewDeleteDNSEntry(ctx *middleware.Context, handler DeleteDNSEntryHandler) *
 	return &DeleteDNSEntry{Context: ctx, Handler: handler}
 }
 
-/* DeleteDNSEntry swagger:route DELETE /dns delete deleteDnsEntry
+/*
+	DeleteDNSEntry swagger:route DELETE /dns delete deleteDnsEntry
 
 Delete dns entry
-
 */
 type DeleteDNSEntry struct {
 	Context *middleware.Context

@@ -16,7 +16,8 @@ import (
 // AddDNSEntryOKCode is the HTTP code returned for type AddDNSEntryOK
 const AddDNSEntryOKCode int = 200
 
-/*AddDNSEntryOK OK
+/*
+AddDNSEntryOK OK
 
 swagger:response addDnsEntryOK
 */
@@ -60,7 +61,8 @@ func (o *AddDNSEntryOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 // AddDNSEntryBadRequestCode is the HTTP code returned for type AddDNSEntryBadRequest
 const AddDNSEntryBadRequestCode int = 400
 
-/*AddDNSEntryBadRequest Bad request
+/*
+AddDNSEntryBadRequest Bad request
 
 swagger:response addDnsEntryBadRequest
 */

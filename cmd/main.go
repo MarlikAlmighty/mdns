@@ -8,23 +8,17 @@ import (
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi"
 	"github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations"
 	apiAdd "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/add"
-
 	apiDelete "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/delete"
-
-	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
-
 	apiList "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/list"
-
+	apiShow "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/show"
 	apiUpdate "github.com/MarlikAlmighty/mdns/internal/gen/restapi/operations/update"
-
+	"github.com/go-openapi/loads"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
-
-	"github.com/go-openapi/loads"
 )
 
 func main() {
@@ -32,7 +26,7 @@ func main() {
 	// get the configuration for the application through ENV
 	cnf := config.New()
 	if err := cnf.GetEnv(); err != nil {
-		log.Fatalf("get environment keys: %v\n", err)
+		log.Fatalf("get env keys: %v\n", err)
 	}
 
 	// start new map for domains record
@@ -45,9 +39,7 @@ func main() {
 	dnsServer := dns.New(dataMap, cnf)
 
 	// start dns server
-	if err := dnsServer.Run(); err != nil {
-		log.Fatalf("run dns service: %v", err)
-	}
+	dnsServer.Run()
 
 	// for stopping
 	shutdown := make(chan os.Signal, 1)
@@ -59,9 +51,9 @@ func main() {
 			select {
 			case <-shutdown:
 				if err := dnsServer.Close(); err != nil {
-					log.Printf("stop dns service: %v", err)
-					return
+					log.Printf("%v\n", err)
 				}
+				return
 			}
 		}
 	}()
@@ -72,7 +64,7 @@ func main() {
 	)
 
 	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
-		log.Fatal("loads swagger spec", err)
+		log.Fatalf("loads swagger spec %v\n", err)
 	}
 
 	api := operations.NewMdnsAPI(swaggerSpec)
@@ -89,14 +81,14 @@ func main() {
 
 	var port int
 	if port, err = strconv.Atoi(cnf.HTTPPort); err != nil {
-		log.Fatal("can't convert port from string", err)
+		log.Fatalf("%v\n", err)
 	}
 
 	server.GracefulTimeout = 3 * time.Second
 	server.Port = port
-	server.Host = cnf.HTTPHost
+	server.Host = "127.0.0.1"
 
 	if err = server.Serve(); err != nil {
-		log.Fatal("start server", err)
+		log.Fatalf("start rest api server %v\n", err)
 	}
 }

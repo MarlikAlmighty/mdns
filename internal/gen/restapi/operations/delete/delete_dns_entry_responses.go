@@ -16,7 +16,8 @@ import (
 // DeleteDNSEntryOKCode is the HTTP code returned for type DeleteDNSEntryOK
 const DeleteDNSEntryOKCode int = 200
 
-/*DeleteDNSEntryOK OK
+/*
+DeleteDNSEntryOK OK
 
 swagger:response deleteDnsEntryOK
 */
@@ -60,7 +61,8 @@ func (o *DeleteDNSEntryOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // DeleteDNSEntryBadRequestCode is the HTTP code returned for type DeleteDNSEntryBadRequest
 const DeleteDNSEntryBadRequestCode int = 400
 
-/*DeleteDNSEntryBadRequest Bad request
+/*
+DeleteDNSEntryBadRequest Bad request
 
 swagger:response deleteDnsEntryBadRequest
 */

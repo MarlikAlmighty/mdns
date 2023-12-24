@@ -29,10 +29,10 @@ func NewShowDNSRecords(ctx *middleware.Context, handler ShowDNSRecordsHandler) *
 	return &ShowDNSRecords{Context: ctx, Handler: handler}
 }
 
-/* ShowDNSRecords swagger:route GET /dns list showDnsRecords
+/*
+	ShowDNSRecords swagger:route GET /dns list showDnsRecords
 
 Show all dns records
-
 */
 type ShowDNSRecords struct {
 	Context *middleware.Context

@@ -16,7 +16,8 @@ import (
 // ShowDNSRecordsOKCode is the HTTP code returned for type ShowDNSRecordsOK
 const ShowDNSRecordsOKCode int = 200
 
-/*ShowDNSRecordsOK OK
+/*
+ShowDNSRecordsOK OK
 
 swagger:response showDnsRecordsOK
 */
@@ -63,7 +64,8 @@ func (o *ShowDNSRecordsOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // ShowDNSRecordsBadRequestCode is the HTTP code returned for type ShowDNSRecordsBadRequest
 const ShowDNSRecordsBadRequestCode int = 400
 
-/*ShowDNSRecordsBadRequest Bad request
+/*
+ShowDNSRecordsBadRequest Bad request
 
 swagger:response showDnsRecordsBadRequest
 */

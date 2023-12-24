@@ -7,6 +7,15 @@ import (
 )
 
 func (core *Core) DeleteDNSEntryHandler(params apiDelete.DeleteDNSEntryParams) middleware.Responder {
+
+	m := core.Resolver.Get(params.Delete.Domain)
+	if m.Domain == "" {
+		return apiDelete.NewDeleteDNSEntryBadRequest().WithPayload(&models.Answer{
+			Code:    400,
+			Message: "domain does not exist",
+		})
+	}
+
 	core.Resolver.Delete(params.Delete.Domain)
 	return apiDelete.NewDeleteDNSEntryOK().WithPayload(&models.Answer{
 		Code:    200,

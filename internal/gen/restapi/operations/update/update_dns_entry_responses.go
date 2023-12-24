@@ -16,7 +16,8 @@ import (
 // UpdateDNSEntryOKCode is the HTTP code returned for type UpdateDNSEntryOK
 const UpdateDNSEntryOKCode int = 200
 
-/*UpdateDNSEntryOK OK
+/*
+UpdateDNSEntryOK OK
 
 swagger:response updateDnsEntryOK
 */
@@ -60,7 +61,8 @@ func (o *UpdateDNSEntryOK) WriteResponse(rw http.ResponseWriter, producer runtim
 // UpdateDNSEntryBadRequestCode is the HTTP code returned for type UpdateDNSEntryBadRequest
 const UpdateDNSEntryBadRequestCode int = 400
 
-/*UpdateDNSEntryBadRequest Bad request
+/*
+UpdateDNSEntryBadRequest Bad request
 
 swagger:response updateDnsEntryBadRequest
 */
