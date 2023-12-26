@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Environment="HTTP_PORT=8081"
-Environment="DNS_TCP_PORT=1053"
-Environment="DNS_UDP_PORT=1053"
+Environment="DNS_TCP_PORT=53"
+Environment="DNS_UDP_PORT=53"
 Environment="NAME_SERVERS=1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
 Type=simple
 PIDFile=/run/mdns.pid
