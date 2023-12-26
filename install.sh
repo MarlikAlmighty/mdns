@@ -32,7 +32,7 @@ fi
 cd /tmp
 git clone https://github.com/MarlikAlmighty/mdns
 if [$? -ne 0 ]; then
-	echo "error while cloning mDNS, exit."
+echo "error while cloning mDNS from github, exit."
 	exit 1
 fi
 
@@ -62,7 +62,6 @@ if [$? -ne 0 ]; then
 	echo "error while chown mode mdns, exit."
 	exit 1
 fi
-
 
 cp mdns.service /etc/systemd/system/mdns.service
 if [$? -ne 0 ]; then
@@ -112,5 +111,18 @@ echo "error while start mdns, exit."
 exit 1
 fi
 
-echo "Done, no errors."
+systemctl status mdns
+if [$? -ne 0 ]; then
+echo "error while status mdns, exit."
+exit 1
+fi
+
+rm -rf /tmp/mdns
+if [$? -ne 0 ]; then
+echo "error while rm -rf /tmp/mdns, exit."
+exit 1
+fi
+
+echo "Done, mDNS is installed."
+
 exit 0
