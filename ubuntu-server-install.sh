@@ -31,98 +31,97 @@ fi
 
 cd /tmp
 git clone https://github.com/MarlikAlmighty/mdns
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while cloning mDNS from github, exit."
-	exit 1
-fi
-
-if [[ -e /tmp/mdns ]]; then
-echo "We have mDNS in /tmp/mdns."
-else 
-	echo "error while cloning mDNS, exit."
 	exit 1
 fi
 
 cd mdns
 cp bin/mdns /usr/local/bin
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 	echo "error while installing mdns, exit."
 	exit 1
 fi
 
-if [[ -e /usr/local/bin/mdns ]]; then
-	echo "mDNS is installed."
-else 
-	echo "error while installing mdns."
-	exit 1
-fi
-
 chmod 755 /usr/local/bin/mdns
-if [$? -ne 0 ]; then
-	echo "error while chown mode mdns, exit."
+ERR=$?
+if [[ $ERR != 0 ]]; then
+	echo "error while chmod /usr/local/bin/mdns, exit."
 	exit 1
 fi
 
 cp mdns.service /etc/systemd/system/mdns.service
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 	echo "error while installing mdns.service, exit."
 	exit 1
 fi
 
 systemctl daemon-reload
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while daemon-reload, exit."
 exit 1
 fi
 
 systemctl enable mdns
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while enable mdns, exit."
 exit 1
 fi
 
 mv /etc/systemd/resolved.conf /etc/systemd/resolved.bak
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while mv resolved.conf, exit."
 exit 1
 fi
 
 cp resolved.conf /etc/systemd/resolved.conf
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while cp resolved.conf, exit."
 exit 1
 fi
 
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while ln resolv.conf, exit."
 exit 1
 fi
 
 systemctl restart systemd-resolved
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while restart systemd-resolved, exit."
 exit 1
 fi
 
+ufw allow mdns
+ERR=$?
+if [[ $ERR != 0 ]]; then
+echo "error while allow mdns, exit."
+exit 1
+fi
+
 systemctl start mdns
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while start mdns, exit."
 exit 1
 fi
 
-systemctl status mdns
-if [$? -ne 0 ]; then
-echo "error while status mdns, exit."
-exit 1
-fi
-
 rm -rf /tmp/mdns
-if [$? -ne 0 ]; then
+ERR=$?
+if [[ $ERR != 0 ]]; then
 echo "error while rm -rf /tmp/mdns, exit."
 exit 1
 fi
 
-echo "Done, mDNS is installed."
+echo "Done, mdns is installed."
 
 exit 0

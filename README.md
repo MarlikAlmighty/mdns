@@ -22,7 +22,7 @@ chmod +x ubuntu-server-install.sh
 Then run it:
 
 ```sh
-./ubuntu-server-install.sh
+sudo ./ubuntu-server-install.sh
 ``` 
 
 ### Request examples
