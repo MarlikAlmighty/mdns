@@ -11,38 +11,19 @@ With the REST API, you can add, modify, and delete DNS zones, records, and serve
 
 mDNS supports various types of DNS records, such as A, CNAME, MX, TXT, and others. You can easily add and modify these records through the REST API to configure your DNS infrastructure according to your needs.
 
+## Usage
 
-### Disable systemd-resolve on Ubuntu
-
+First, get the script and make it executable:
 ```sh
-sudo nano /etc/systemd/resolved.conf
-
-[Resolve]
-DNS=127.0.0.1
-#FallbackDNS=
-#Domains=
-#LLMNR=no
-#MulticastDNS=no
-#DNSSEC=no
-#DNSOverTLS=no
-#Cache=no
-DNSStubListener=no
-#ReadEtcHosts=yes
-
-sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-
-sudo reboot
+curl -O https://raw.githubusercontent.com/MarlikAlmighty/mdns/master/install.sh
+chmod +x install.sh
 ```
 
-### Run
+Then run it:
 
 ```sh
-$ export HTTP_PORT="8081"
-$ export DNS_TCP_PORT="1053"
-$ export DNS_UDP_PORT="1053"
-$ export NAME_SERVERS="1.1.1.1,1.0.0.1,8.8.8.8,8.8.4.4"
-$ go run ./cmd/...
-```
+./install.sh
+``` 
 
 ### Request examples
 
@@ -64,18 +45,6 @@ curl -X PUT http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \
 # Delete domain
 curl -X DELETE http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \ 
     -d '{"domain":"example.com."}'
-```
-
-### Build
-
-```sh
-$ make all 
-```
-
-### Docker
-
-```sh
-$ docker build -t marlikalmighty/mdns .
 ```
 
 ### API Documentation
