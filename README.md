@@ -15,8 +15,8 @@ mDNS supports various types of DNS records, such as A, CNAME, MX, TXT, and other
 
 First, get the script and make it executable:
 ```sh
-curl -O https://raw.githubusercontent.com/MarlikAlmighty/mdns/master/install.sh
-chmod +x install.sh
+curl -O https://raw.githubusercontent.com/MarlikAlmighty/mdns/master/ubuntu-server-install.sh
+chmod +x ubuntu-server-install.sh
 ```
 
 Then run it:
