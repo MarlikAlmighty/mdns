@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Installing mDNS"
+echo "Installing mdns server..."
 
 	if [ "$EUID" -ne 0 ]; then
     echo "Sorry, you need to run this as root"
@@ -101,16 +101,6 @@ echo "error while restart systemd-resolved, exit."
 exit 1
 fi
 
-ufw enable -y
-ufw allow ssh
-ufw allow 8081/tcp
-ufw allow 53/tcp
-ufw allow 53/udp
-ERR=$?
-if [[ $ERR != 0 ]]; then
-echo "here is error: ufw allow 53 ports, do it manually"
-fi
-
 systemctl start mdns
 ERR=$?
 if [[ $ERR != 0 ]]; then
@@ -126,7 +116,7 @@ exit 1
 fi
 
 # add hostname to /etc/hosts
-echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo tee -a /etc/hosts > /dev/null
+# echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo tee -a /etc/hosts > /dev/null
 
 echo "Done, mdns is installed."
 

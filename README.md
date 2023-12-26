@@ -13,7 +13,19 @@ mDNS supports various types of DNS records, such as A, CNAME, MX, TXT, and other
 
 ## Usage
 
-First, get the script and make it executable:
+Open ports 53 in your firewall:
+```sh
+sudo ufw enable
+sudo ufw allow 53/tcp
+sudo ufw allow 53/udp
+```
+
+Don't forget 22 for SSH:
+```sh
+sudo ufw allow 22
+```
+
+Get the script and make it executable:
 ```sh
 curl -O https://raw.githubusercontent.com/MarlikAlmighty/mdns/master/ubuntu-server-install.sh
 chmod +x ubuntu-server-install.sh
