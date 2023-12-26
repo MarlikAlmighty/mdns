@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo ""
+echo "Installing mDNS"
+echo ""
+
 	if [ "$EUID" -ne 0 ]; then
     echo "Sorry, you need to run this as root"
 		exit 1
@@ -39,3 +43,6 @@ mv /etc/systemd/resolved.conf /etc/systemd/resolved.bak
 cp resolved.conf /etc/systemd/resolved.conf
 ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 systemctl restart systemd-resolved
+
+echo ""
+echo "Done."

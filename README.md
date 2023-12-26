@@ -30,7 +30,7 @@ Then run it:
 ```sh
 # Add domain
 curl -X POST http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \
-    -d '{"domain":"example.com.", "ipv4s":["127.0.0.1"]}'
+-d '{"domain":"example.com.", "ipv4s":["127.0.0.1"]}'
 
 # List all domains
 curl http://127.0.0.1:8081/dns
@@ -39,12 +39,12 @@ curl http://127.0.0.1:8081/dns
 curl http://127.0.0.1:8081/dns/example.com.
 
 # Update domain
-curl -X PUT http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \ 
-    -d '{"domain":"example.com.", "ipv4s":["127.0.0.2", "127.0.0.3"]}'
+curl -X PUT http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \
+-d '{"domain":"example.com.", "ipv4s":["127.0.0.2", "127.0.0.3"]}'
 
 # Delete domain
-curl -X DELETE http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \ 
-    -d '{"domain":"example.com."}'
+curl -X DELETE http://127.0.0.1:8081/dns -H 'Content-Type: application/json' \
+-d '{"domain":"example.com."}'
 ```
 
 ### API Documentation
