@@ -101,11 +101,11 @@ echo "error while restart systemd-resolved, exit."
 exit 1
 fi
 
-ufw allow mdns
+ufw allow 53/tcp
+ufw allow 53/udp
 ERR=$?
 if [[ $ERR != 0 ]]; then
-echo "error while allow mdns, exit."
-exit 1
+echo "here is error: ufw allow 53 ports, do it manually"
 fi
 
 systemctl start mdns
