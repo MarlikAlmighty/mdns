@@ -1,6 +1,6 @@
 FROM golang:1.21-alpine3.18 AS builder
 
-ENV CGO_ENABLED 0
+ENV CGO_ENABLED=0
 ENV TZ=Europe/Moscow
 
 WORKDIR /go/src/mdns
