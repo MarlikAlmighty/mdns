@@ -5,30 +5,25 @@
 [![License](https://img.shields.io/badge/License-MIT%201.0-orange.svg)](https://github.com/MarlikAlmighty/mdns/blob/master/LICENSE) &nbsp;
 
 
-mDNS is a lightweight application capable of processing DNS queries and managing DNS zones through a REST API. It is designed to provide fast and efficient operation, as well as ease of use.
-
-With the REST API, you can add, modify, and delete DNS zones, records, and server settings. All operations are performed through HTTP requests, making DNS server management convenient and flexible.
-
-mDNS supports various types of DNS records, such as A, CNAME, MX, TXT, and others. You can easily add and modify these records through the REST API to configure your DNS infrastructure according to your needs.
+**mDNS** is a lightweight application capable of processing dns queries and managing dns zones through a rest api. With the rest api, you can add, modify, and delete dns zones, records, and server settings. All operations are performed through http requests, making dns server management convenient and flexible.
 
 ## Usage
 
-Open ports 53 in your firewall:
+Open 53 ports in your firewall:
 ```sh
 sudo ufw enable
 sudo ufw allow 53/tcp
 sudo ufw allow 53/udp
 ```
 
-Don't forget 22 for SSH:
-```sh
-sudo ufw allow 22
-```
-
-Get the script and make it executable:
+Get the script:
 ```sh
 curl -O https://raw.githubusercontent.com/MarlikAlmighty/mdns/master/ubuntu-server-install.sh
-chmod +x ubuntu-server-install.sh
+```
+
+Make it executable:
+```sh
+sudo chmod +x ubuntu-server-install.sh
 ```
 
 Then run it:
