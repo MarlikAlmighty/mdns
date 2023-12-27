@@ -16,7 +16,7 @@ RUN upx --best --lzma -o /app /app
 
 FROM scratch
 
-COPY --from=upx /app /mdns
+COPY --from=upx /mdns /app
 
 ENV HTTP_PORT=8081
 ENV DNS_TCP_PORT=53
