@@ -32,6 +32,12 @@ Then run it:
 sudo ./ubuntu-server-install.sh
 ``` 
 
+## Docker
+
+```sh
+docker run -it --rm -p 53:53/udp -p 53:53/tcp -p 8081:8081 -d marlikalmighty/mdns
+```
+
 ### Request examples
 
 ```sh

@@ -10,9 +10,13 @@ COPY . .
 RUN go mod tidy 
 RUN go build -o /go/src/mdns/app /go/src/mdns/cmd/main.go
 
+FROM gruebel/upx:latest as upx
+COPY --from=builder /go/src/mdns/app /app
+RUN upx --best --lzma -o /app /app
+
 FROM scratch
 
-COPY --from=builder /go/src/mdns/app /mdns
+COPY --from=upx /app /mdns
 
 ENV HTTP_PORT=8081
 ENV DNS_TCP_PORT=53
