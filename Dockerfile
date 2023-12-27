@@ -7,8 +7,7 @@ WORKDIR /go/src/mdns
 
 COPY . .
 
-RUN go mod tidy 
-RUN go build -o /go/src/mdns/app /go/src/mdns/cmd/main.go
+RUN go mod tidy && go build -o /go/src/mdns/app /go/src/mdns/cmd/main.go
 
 FROM gruebel/upx:latest as upx
 COPY --from=builder /go/src/mdns/app /app
